@@ -242,7 +242,7 @@ var createClass = function (desc) {
  * CapabilityFilter consists of a list of capabilities which
  * must all be present in order for the filter to match.
  *
- * For example, `new CapabilityFilter(["MediaPlayer.Display.Video", "MediaControl.Pause"])`
+ * For example, `new ConnectSDK.CapabilityFilter(["MediaPlayer.Display.Video", "MediaControl.Pause"])`
  * describes a device that supports showing a video and pausing it.
  */
 var CapabilityFilter = createClass(
@@ -370,7 +370,6 @@ var DiscoveryManager = createClass(
         var event = args[0];
         var update = args[1];
 
-        //console.log("got event " + event + ": " + JSON.stringify(update));
         if (event) {
             if (event === "startdiscovery") {
                 this._started = true;
@@ -493,8 +492,8 @@ var DiscoveryManager = createClass(
      * ```js
      * // Show devices that support playing videos and pausing OR support launching YouTube with a video id
      * ConnectSDK.discoveryManager.setCapabilityFilters([
-     *     new CapabilityFilter(["MediaPlayer.Display.Video", "MediaControl.Pause"])
-     *     new CapabilityFilter(["Launcher.YouTube.Params"])
+     *     new ConnectSDK.CapabilityFilter(["MediaPlayer.Display.Video", "MediaControl.Pause"])
+     *     new ConnectSDK.CapabilityFilter(["Launcher.YouTube.Params"])
      * ])
      * ```
      *
@@ -709,7 +708,6 @@ var ConnectableDevice = createClass(
             this._ready = true;
         }
 
-        //console.log("got device event: " + event);
         this.emit.apply(this, args);
     },
 
@@ -1058,7 +1056,6 @@ var WrappedObject = {
     },
 
     _handleEvent: function (args) {
-        console.log("@@ event: " + JSON.stringify(args));
         this.emit.apply(this, args);
     }
 };
