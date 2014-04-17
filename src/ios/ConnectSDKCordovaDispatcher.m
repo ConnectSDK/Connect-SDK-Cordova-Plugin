@@ -760,6 +760,16 @@ static id orNull (id obj)
 
 #pragma mark - MouseControl
 
+- (void) mouseControl_connectMouse:(JSCommand*)command
+{
+    [device.mouseControl connectMouseWithSuccess:command.success failure:command.failure];
+}
+
+- (void) mouseControl_disconnectMouse:(JSCommand*)command
+{
+    [device.mouseControl disconnectMouse];
+}
+
 - (void) mouseControl_move:(JSCommand*)command
 {
     double dx = [(NSNumber*)command.args[@"dx"] doubleValue];

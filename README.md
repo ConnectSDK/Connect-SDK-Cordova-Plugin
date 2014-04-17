@@ -90,6 +90,11 @@ Next, follow the README.md from the Connect SDK iOS and Android source repositor
 * Developer Support support@connectsdk.com
 * Partnerships partners@connectsdk.com
 
+## Troubleshooting
+
+* If the plugin doesn't load on iOS, check if the *.m files are in the project's
+  "Compile Sources" list in "Build Phases".
+
 ## License
 
 Copyright (c) 2013-2014 LG Electronics.
