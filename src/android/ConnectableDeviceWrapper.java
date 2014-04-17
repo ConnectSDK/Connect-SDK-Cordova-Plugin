@@ -90,8 +90,16 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
 			JSONArray services = new JSONArray();
 			
 			for (DeviceService service : device.getServices()) {
+				String serviceName = service.getServiceName();
+
+				if (serviceName == null) {
+					Log.e("ConnectSDK", "service is missing id: " + service.getClass().getName());
+					continue;
+				}
+
 				JSONObject serviceObj = new JSONObject();
-				serviceObj.put("name", service.getServiceName());
+				serviceObj.put("name", serviceName);
+				services.put(serviceObj);
 			}
 			
 			obj.put("services", services);
