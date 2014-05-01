@@ -389,7 +389,14 @@ static id orNull (id obj)
 - (void) launcher_launchApp:(JSCommand*)command
 {
     NSString* appId = command.args[@"appId"];
-    [device.launcher launchApp:appId success:command.appLaunchSuccess failure:command.failure];
+    NSObject* params = command.args[@"params"];
+    
+    if (params) {
+        AppInfo* appInfo = [AppInfo appInfoForId:appId];
+        [device.launcher launchAppWithInfo:appInfo params:params success:command.success failure:command.failure];
+    } else {
+        [device.launcher launchApp:appId success:command.appLaunchSuccess failure:command.failure];
+    }
 }
 
 - (void) launcher_closeApp:(JSCommand*)command
@@ -789,9 +796,9 @@ static id orNull (id obj)
     [device.mouseControl clickWithSuccess:command.success failure:command.failure];
 }
 
-#pragma mark - KeyboardControl
+#pragma mark - TextInputControl
 
-- (ServiceSubscription*) textInputControl_subscribeKeyboardStatus:(JSCommand*)command
+- (ServiceSubscription*) textInputControl_subscribeTextInputStatus:(JSCommand*)command
 {
     return [device.textInputControl subscribeTextInputStatusWithSuccess:command.textInputStatusInfoSuccess failure:command.failure];
 }
