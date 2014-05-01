@@ -389,8 +389,8 @@ static id orNull (id obj)
 - (void) launcher_launchApp:(JSCommand*)command
 {
     NSString* appId = command.args[@"appId"];
-    NSObject* params = command.args[@"params"];
-    
+    NSDictionary* params = command.args[@"params"];
+
     if (params) {
         AppInfo* appInfo = [AppInfo appInfoForId:appId];
         [device.launcher launchAppWithInfo:appInfo params:params success:command.success failure:command.failure];
