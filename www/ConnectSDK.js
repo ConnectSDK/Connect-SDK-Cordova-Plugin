@@ -604,6 +604,8 @@ var ConnectableDevice = createClass(
     
     statics: {
         _interfaceClasses: {},
+        _serviceWrappers: {},
+
         _registerInterface: function (name, ifaceClass) {
             var getterName = "get" + name[0].toUpperCase() + name.substr(1);
             
@@ -612,6 +614,14 @@ var ConnectableDevice = createClass(
             this.prototype[getterName] = function () {
                 return this._interfaces[name];
             };
+        },
+
+        _registerServiceWrapper: function (serviceName, wrapperFunc) {
+            if (!serviceName) {
+                throw new TypeError("invalid name: " + serviceName);
+            }
+
+            this._serviceWrappers[serviceName] = wrapperFunc;
         }
     },
 
@@ -858,6 +868,22 @@ var ConnectableDevice = createClass(
         }
 
         return serviceName in this._services;
+    },
+
+    /**
+     * Returns a wrapper for a service which gives access to low-level
+     * functionality. Only a limited subset of the services supported
+     * by the native SDK are available through this plugin.
+     *
+     * @param {string} serviceName
+     * @returns {object} service object or null if not supported
+     */
+    getService: function (serviceName) {
+        if (this.hasService(serviceName) && serviceName in ConnectableDevice._serviceWrappers) {
+            return ConnectableDevice._serviceWrappers[serviceName](this);
+        } else {
+            return null;
+        }
     },
     
     _createCommandId: function () {
@@ -1913,10 +1939,56 @@ registerDeviceInterface("webAppLauncher",
     /**
      * @method
      * @param {string} webAppId
+     * @param {object} params
+     * @success {webAppLaunchCallback}
+     */
+    joinWebApp: {
+        args: ["webAppId", "params?"],
+        responseWrapper: wrapWebAppSession
+    },
+
+    /**
+     * @method
+     * @param {string} webAppId
      */
     closeWebApp: {
         args: ["webAppId"]
     }
+});
+
+var ServiceWrapper = createClass({
+    _interfaceName: "",
+
+    constructor: function (device) {
+    },
+
+    _sendServiceCommand: function (methodName, args, subscribe) {
+        return this._device._sendCommand(this._interfaceName, methodName, args, subscribe);
+    }
+});
+
+var WebOSTVServiceWrapper = createClass({
+    inherits: ServiceWrapper,
+    _interfaceName: "webOSTVService",
+
+    constructor: function (device) {
+        ServiceWrapper.call(this, device);
+        this._device = device;
+    },
+
+    // connect and wait for app
+    connectToApp: function (appId) {
+        return this._sendServiceCommand("joinApp", {appId: appId}, false, wrapWebAppSession);
+    },
+
+    // connect to app if running, or return an error if not running
+    joinApp: function (appId) {
+        return this._sendServiceCommand("joinApp", {appId: appId}, false, wrapWebAppSession);
+    }
+});
+
+ConnectableDevice._registerServiceWrapper(Services.WebOSTV, function (device) {
+    return new WebOSTVServiceWrapper(device);
 });
 
 exports.Command = Command;

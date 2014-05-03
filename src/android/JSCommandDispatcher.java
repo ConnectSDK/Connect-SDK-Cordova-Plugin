@@ -39,6 +39,7 @@ import com.connectsdk.core.ExternalInputInfo;
 import com.connectsdk.core.TextInputStatusInfo;
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.service.DeviceService;
+import com.connectsdk.service.WebOSTVService;
 import com.connectsdk.service.capability.ExternalInputControl.ExternalInputListListener;
 import com.connectsdk.service.capability.MediaControl;
 import com.connectsdk.service.capability.MediaControl.DurationListener;
@@ -220,19 +221,25 @@ public class JSCommandDispatcher {
 	}
 	
 	@CommandMethod
-	public ServiceSubscription<?> textInputControl_subscribeKeyboardStatus(JSCommand command, JSONObject args) throws JSONException {
+	public ServiceSubscription<?> textInputControl_subscribeKeyboardStatus(final JSCommand command, JSONObject args) throws JSONException {
 		return device.getTextInputControl().subscribeTextInputStatus(new TextInputControl.TextInputStatusListener() {
-			
 			@Override
 			public void onError(ServiceCommandError error) {
-				// TODO Auto-generated method stub
-				
+				command.error(error);
 			}
 			
 			@Override
-			public void onSuccess(TextInputStatusInfo object) {
-				// TODO Auto-generated method stub
+			public void onSuccess(TextInputStatusInfo status) {
+				JSONObject response = new JSONObject();
 				
+				try {
+					response.put("isVisible", status.isFocused());
+					response.put("rawData", status.getRawData());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				
+				command.success(response);
 			}
 		});
 	}
@@ -598,6 +605,33 @@ public class JSCommandDispatcher {
 		final WebAppSessionWrapper wrapper = getWebAppSessionWrapper(objectId);
 		
 		wrapper.session.sendMessage(json, command.getResponseListener());
+	}
+	
+	/* Service-specific methods */
+	@CommandMethod
+	public void webOSTVService_connectToApp(JSCommand command, JSONObject args) throws JSONException {
+		WebOSTVService service = (WebOSTVService) device.getServiceByName(WebOSTVService.ID);
+		
+		String appId = args.getString("appId");
+		
+		if (service != null) {
+			service.connectToApp(appId, command.getWebAppLaunchListener());
+		} else {
+			command.error("WebOSTVService not available for this device");
+		}
+	}
+	
+	@CommandMethod
+	public void webOSTVService_joinApp(JSCommand command, JSONObject args) throws JSONException {
+		WebOSTVService service = (WebOSTVService) device.getServiceByName(WebOSTVService.ID);
+		
+		String appId = args.getString("appId");
+		
+		if (service != null) {
+			service.joinApp(appId, command.getWebAppLaunchListener());
+		} else {
+			command.error("WebOSTVService not available for this device");
+		}
 	}
 	
 	/* Special methods */

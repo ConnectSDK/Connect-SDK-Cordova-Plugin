@@ -66,10 +66,12 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
 	// Active means that the wrapper is actively listening for events
 	public void setActive(boolean activate) {
 		if (!active && activate) {
-			this.device.addListener(this);
+			this.device.setListener(this);
 			active = true;
 		} else if (active && !activate) {
-			this.device.removeListener(this);
+			if (this.device.getListener() == this) {
+				this.device.setListener(null);
+			}
 			active = false;
 		}
 		

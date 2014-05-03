@@ -20,6 +20,7 @@
 #import <Cordova/CDV.h>
 #import <ConnectSDK/ConnectSDK.h>
 #import <objc/message.h>
+#import <ConnectSDK/WebOSTVService.h>
 #import "ConnectSDKCordovaDispatcher.h"
 #import "ConnectSDKCordovaObjects.h"
 
@@ -716,6 +717,11 @@ static id orNull (id obj)
         [device.webAppLauncher launchWebApp:command.args[@"webAppId"] success:command.webAppLaunchSuccess failure:command.failure];
 }
 
+- (void) webAppLauncher_joinWebApp:(JSCommand*)command
+{
+    [device.webAppLauncher joinWebAppWithId:command.args[@"webAppId"] success:command.webAppLaunchSuccess failure:command.failure];
+}
+
 #pragma mark - KeyControl
 
 - (void) keyControl_up:(JSCommand*)command
@@ -864,6 +870,34 @@ static id orNull (id obj)
     WebAppSession* session = wrapper.session;
     
     [session sendJSON:dict success:command.success failure:command.failure];
+}
+
+#pragma mark - Service methods
+
+- (void) webOSTVService_connectToApp:(JSCommand*)command
+{
+    WebOSTVService* service = (WebOSTVService*)[device serviceWithName:kConnectSDKWebOSTVServiceId];
+    
+    NSString* appId = command.args[@"appId"];
+    
+    if (service) {
+        [service connectToApp:appId success:command.webAppLaunchSuccess failure:command.failure];
+    } else {
+        [command sendErrorMessage:@"WebOSTVService not available on this device"];
+    }
+}
+
+- (void) webOSTVService_joinApp:(JSCommand*)command
+{
+    WebOSTVService* service = (WebOSTVService*)[device serviceWithName:kConnectSDKWebOSTVServiceId];
+    
+    NSString* appId = command.args[@"appId"];
+    
+    if (service) {
+        [service joinApp:appId success:command.webAppLaunchSuccess failure:command.failure];
+    } else {
+        [command sendErrorMessage:@"WebOSTVService not available on this device"];
+    }
 }
 
 #pragma mark - Special CORDOVAPLUGIN interface for JS-specific commands
