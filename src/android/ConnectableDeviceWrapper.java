@@ -66,19 +66,11 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
 	// Active means that the wrapper is actively listening for events
 	public void setActive(boolean activate) {
 		if (!active && activate) {
-			this.device.setListener(this);
+			this.device.addListener(this);
 			active = true;
 		} else if (active && !activate) {
-			if (this.device.getListener() == this) {
-				this.device.setListener(null);
-			}
+			this.device.removeListener(this);
 			active = false;
-		}
-		
-		// Send a connected event so listener knows we're connected
-		// FIXME need an isReady()
-		if (this.device.isConnected()) {
-			this.sendEvent("ready");
 		}
 	}
 	
@@ -88,6 +80,7 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
 		try {
 			obj.put("deviceId", deviceId);
 			obj.put("capabilities", new JSONArray(device.getCapabilities()));
+			obj.put("ready", device.isConnected()); // FIXME need actual ready state
 			
 			JSONArray services = new JSONArray();
 			

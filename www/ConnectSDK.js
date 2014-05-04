@@ -524,6 +524,7 @@ var DiscoveryManager = createClass(
 
         var success = function (deviceDesc) {
             var device = self._getDeviceByDesc(deviceDesc);
+            device._handleDiscoveryUpdate(deviceDesc);
             picker.emit("success", device);
             picker.emit("complete", undefined, device);
         };
@@ -630,7 +631,7 @@ var ConnectableDevice = createClass(
         this._nextCommandId = 1;
         this._interfaces = {};
         this._desc = desc;
-        this._ready = false;
+        this._ready = desc.ready || false;
 
         for (var name in ConnectableDevice._interfaceClasses) {
             var IfaceClass = ConnectableDevice._interfaceClasses[name];
@@ -689,6 +690,10 @@ var ConnectableDevice = createClass(
         this._desc = desc;
         this._cacheServices();
         this._cacheCapabilities();
+
+        if (desc.ready !== undefined) {
+            this._ready = desc.ready;
+        }
     },
 
     _handleUpdate: function (args) {

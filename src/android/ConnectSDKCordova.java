@@ -33,8 +33,7 @@ import android.util.Log;
 
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.device.SimpleDevicePicker;
-import com.connectsdk.device.SimpleDevicePicker.OnDeviceReadyListener;
-import com.connectsdk.device.SimpleDevicePicker.OnSelectDeviceListener;
+import com.connectsdk.device.SimpleDevicePickerListener;
 import com.connectsdk.discovery.DiscoveryManager;
 import com.connectsdk.service.command.ServiceCommandError;
 
@@ -118,8 +117,9 @@ public class ConnectSDKCordova extends CordovaPlugin {
 		    	pickDevice(args, callbackContext);
 		    	return true;
 		    } else if ("setDeviceListener".equals(action)) {
-		    	// FIXME need to implement
-		    	return false;
+		    	ConnectableDeviceWrapper deviceWrapper = getDeviceWrapper(args.getString(0));
+		    	deviceWrapper.setCallbackContext(callbackContext);
+		    	return true;
 		    } else if ("connectDevice".equals(action)) {
 		    	ConnectableDeviceWrapper deviceWrapper = getDeviceWrapper(args.getString(0));
 		    	deviceWrapper.setCallbackContext(callbackContext);
@@ -205,26 +205,20 @@ public class ConnectSDKCordova extends CordovaPlugin {
 				public void run() {
 					SimpleDevicePicker picker = new SimpleDevicePicker(cordova.getActivity());
 					
-					picker.setOnSelectDeviceListener(new OnSelectDeviceListener () {
+					picker.setListener(new SimpleDevicePickerListener() {
 						@Override
-						public void onSelectDevice(ConnectableDevice device) {
-							ConnectableDeviceWrapper wrapper = getDeviceWrapper(device);
-							
-							// Hack to force wrapper to set permissions
-							wrapper.setActive(true);
+						public void onPrepareDevice(ConnectableDevice device) {
 						}
-					});
-					
-					picker.setOnDeviceReadyListener(new OnDeviceReadyListener() {
+						
 						@Override
-						public void onDeviceReady(ConnectableDevice device) {
+						public void onPickDevice(ConnectableDevice device) {
 							ConnectableDeviceWrapper wrapper = getDeviceWrapper(device);
 							
 							callbackContext.success(wrapper.toJSONObject());
 						}
 
 						@Override
-						public void onDeviceNotReady(ConnectableDevice device) {
+						public void onPickDeviceFailed(boolean canceled) {
 						}
 					});
 					picker.showPicker();

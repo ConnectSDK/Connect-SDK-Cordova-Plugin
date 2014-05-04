@@ -221,7 +221,7 @@ public class JSCommandDispatcher {
 	}
 	
 	@CommandMethod
-	public ServiceSubscription<?> textInputControl_subscribeKeyboardStatus(final JSCommand command, JSONObject args) throws JSONException {
+	public ServiceSubscription<?> textInputControl_subscribeTextInputStatus(final JSCommand command, JSONObject args) throws JSONException {
 		return device.getTextInputControl().subscribeTextInputStatus(new TextInputControl.TextInputStatusListener() {
 			@Override
 			public void onError(ServiceCommandError error) {
