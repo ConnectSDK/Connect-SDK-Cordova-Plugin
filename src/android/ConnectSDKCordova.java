@@ -164,7 +164,7 @@ public class ConnectSDKCordova extends CordovaPlugin {
 	
 	void initDiscoveryManagerWrapper() {
 		if (discoveryManagerWrapper == null) {
-			DiscoveryManager.init(cordova.getActivity());
+			DiscoveryManager.init(cordova.getActivity().getApplicationContext());
 			discoveryManager = DiscoveryManager.getInstance();
 			discoveryManagerWrapper = new DiscoveryManagerWrapper(this, discoveryManager);
 		}
