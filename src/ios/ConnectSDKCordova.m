@@ -41,7 +41,7 @@
 {
     JSDeviceState *state = [JSDeviceState new];
     state.device = device;
-    state.deviceId = [NSString stringWithFormat:@"device_%ld", random(), nil];
+    state.deviceId = [device id];
     state.callbackId = nil;
     
     return state;

@@ -396,8 +396,6 @@ var DiscoveryManager = createClass(
             } else {
                 this.emit.apply(this, args);
             }
-            
-
         }
     },
 
@@ -765,7 +763,7 @@ var ConnectableDevice = createClass(
      * @returns {string}
      */
     getIPAddress: function () {
-        return this._desc.ipAddress;
+        return this._desc.ipAddress || this._desc.lastKnownIPAddress;
     },
     
     /**
@@ -889,6 +887,17 @@ var ConnectableDevice = createClass(
         } else {
             return null;
         }
+    },
+
+    /**
+     * Returns an internal id assigned by the SDK to this device.
+     * For devices that have been connected to or paired, this
+     * id will be persisted to disk in the device store to allow
+     * the app to identify the device later (such as reconnecting
+     * to the last connected device when starting the app).
+     */
+    getId: function () {
+        return this._deviceId;
     },
     
     _createCommandId: function () {
