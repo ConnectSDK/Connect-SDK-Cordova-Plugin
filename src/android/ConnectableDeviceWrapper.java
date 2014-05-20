@@ -48,7 +48,7 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
 	public ConnectableDeviceWrapper(ConnectSDKCordova plugin, ConnectableDevice device) {
 		this.plugin = plugin;
 		this.device = device;
-		this.deviceId = device.getUUID();
+		this.deviceId = device.getId();
 		this.dispatcher = new JSCommandDispatcher(this);
 	}
 	
