@@ -547,6 +547,13 @@ public class JSCommandDispatcher {
 			device.getWebAppLauncher().launchWebApp(webAppId, command.getWebAppLaunchListener());
 	}
 	
+	@CommandMethod
+	public void webAppLauncher_joinWebApp(JSCommand command, JSONObject args) throws JSONException {
+		String webAppId = args.getString("webAppId");
+
+		device.getWebAppLauncher().joinWebApp(webAppId, command.getWebAppLaunchListener());
+	}
+	
 	/* WebAppSession methods */
 	
 	WebAppSessionWrapper getWebAppSessionWrapper(String objectId) {
