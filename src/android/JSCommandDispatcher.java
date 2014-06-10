@@ -511,7 +511,7 @@ public class JSCommandDispatcher {
 	
 	@CommandMethod
 	public void volumeControl_volumeDown(JSCommand command, JSONObject args) throws JSONException {
-		device.getVolumeControl().volumeUp(command.getResponseListener());
+		device.getVolumeControl().volumeDown(command.getResponseListener());
 	}
 	
 	@CommandMethod
