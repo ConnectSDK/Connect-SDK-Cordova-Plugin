@@ -174,11 +174,12 @@
     DevicePicker *picker = [_discoveryManager devicePicker];
     picker.delegate = self;
     
+    UIView *view = [self.viewController view];
+    
     if (popup) {
-        UIView *view = [self.viewController view];
         [picker showActionSheet:view];
     } else {
-        [picker showPicker:self];
+        [picker showPicker:view];
     }
 }
 
