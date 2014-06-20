@@ -313,6 +313,16 @@ var PairingLevel = {
 
 /**
  * @constant
+ * @property {string} WEBAPP - display media using a web app mirrored to the TV (iOS only)
+ * @property {string} MEDIA - display media using AirPlay media playback APIs
+ */
+var AirPlayServiceMode = {
+    WEBAPP: "webapp",
+    MEDIA: "media"
+};
+
+/**
+ * @constant
  * @property {string} Chromecast - Chromecast
  * @property {string} DIAL - DIAL
  * @property {string} DLNA - DLNA
@@ -416,7 +426,16 @@ var DiscoveryManager = createClass(
                          [{pairingLevel: this._config.pairingLevel}]);
         }
     },
-    
+
+    _setAirPlayServiceMode: function (mode, updateNow) {
+        this._config.airPlayServiceMode = mode;
+
+        if (updateNow) {
+            cordova.exec(null, null, PLUGIN_ID, "setDiscoveryConfig",
+                         [{airPlayServiceMode: this._config.airPlayServiceMode}]);
+        }
+    },
+
     _setCapabilityFilters: function (filters, updateNow) {
         filters = filters || [];
         
@@ -480,6 +499,15 @@ var DiscoveryManager = createClass(
      */
     setPairingLevel: function (pairingLevel) {
         this._setPairingLevel(pairingLevel, true);
+    },
+
+    /**
+     * Set mode for AirPlay support. If set to ConnectSDK.AirPlayServiceMode.WebApp, a web app will
+     * will be mirrored to the TV. If set to ConnectSDK.AirPlayServiceMode.Media, only media
+     * APIs will be available. On Android, media mode is the only option.
+     */
+    setAirPlayServiceMode: function (mode) {
+        this._setAirPlayServiceMode(mode, true);
     },
 
     /**
@@ -2012,6 +2040,7 @@ exports.DevicePicker = DevicePicker;
 exports.ConnectableDevice = ConnectableDevice;
 exports.CapabilityFilter = CapabilityFilter;
 exports.PairingLevel = PairingLevel;
+exports.AirPlayServiceMode = AirPlayServiceMode;
 exports.Services = Services;
 
 // Singleton instance

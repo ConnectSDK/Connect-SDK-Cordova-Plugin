@@ -21,6 +21,7 @@
 #import "ConnectSDKCordovaDispatcher.h"
 #import "ConnectSDK/CapabilityFilter.h"
 #import "ConnectSDKCordovaObjects.h"
+#import "ConnectSDK/AirPlayService.h"
 
 #pragma mark - Helper types
 
@@ -85,6 +86,15 @@
                 [_discoveryManager setPairingLevel:ConnectableDevicePairingLevelOff];
             } else if ([pairingLevel isEqualToString:@"on"]) {
                 [_discoveryManager setPairingLevel:ConnectableDevicePairingLevelOn];
+            }
+        }
+        
+        NSString* airPlayServiceMode = config[@"airPlayServiceMode"];
+        if (airPlayServiceMode) {
+            if ([airPlayServiceMode isEqualToString:@"webapp"]) {
+                [AirPlayService setAirPlayServiceMode:AirPlayServiceModeWebApp];
+            } else if ([airPlayServiceMode isEqualToString:@"on"]) {
+                [AirPlayService setAirPlayServiceMode:AirPlayServiceModeMedia];
             }
         }
         
