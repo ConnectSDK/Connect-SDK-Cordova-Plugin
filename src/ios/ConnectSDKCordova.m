@@ -93,7 +93,7 @@
         if (airPlayServiceMode) {
             if ([airPlayServiceMode isEqualToString:@"webapp"]) {
                 [AirPlayService setAirPlayServiceMode:AirPlayServiceModeWebApp];
-            } else if ([airPlayServiceMode isEqualToString:@"on"]) {
+            } else if ([airPlayServiceMode isEqualToString:@"media"]) {
                 [AirPlayService setAirPlayServiceMode:AirPlayServiceModeMedia];
             }
         }
@@ -538,6 +538,15 @@ static id orNull (id obj)
             break;
         case DeviceServicePairingTypeNone:
             pairingInfo = @{@"pairingType": @"none"};
+            break;
+        case DeviceServicePairingTypeMixed:
+            pairingInfo = @{@"pairingType": @"mixed"};
+            break;
+        case DeviceServicePairingTypeAirPlayMirroring:
+            // TODO: provide a way to override automatically showing alert
+            [(UIAlertView *)pairingData show];
+            
+            pairingInfo = @{@"pairingType": @"airPlayMirroring"};
             break;
     }
     
