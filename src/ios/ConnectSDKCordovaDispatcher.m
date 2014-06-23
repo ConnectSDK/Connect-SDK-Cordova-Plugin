@@ -347,9 +347,9 @@ static id orNull (id obj)
             id result = nil;
             
             if (sig.methodReturnLength > 0) { // FIXME verify type
-                result = objc_msgSend(self, sel, command);;
+                result = ((id(*)(id, SEL, id))objc_msgSend)(self, sel, command);
             } else {
-                objc_msgSend(self, sel, command);
+                ((id(*)(id, SEL, id))objc_msgSend)(self, sel, command);
             }
             
             if (result && [result isMemberOfClass:[ServiceSubscription class]]) {
