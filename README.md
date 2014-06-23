@@ -33,6 +33,10 @@ If you are only developing for one platform, feel free to ignore the steps & req
 
     cordova plugins add https://github.com/ConnectSDK/Connect-SDK-Cordova-Plugin.git#master
 
+Or for a specific branch, such as sdk_1.3:
+
+    cordova plugins add https://github.com/ConnectSDK/Connect-SDK-Cordova-Plugin.git#sdk_1.3
+
 #### 3. Setup projects
 
 Run the following command to create Xcode and Eclipse projects:
@@ -94,6 +98,9 @@ Next, follow the README.md from the Connect SDK iOS and Android source repositor
 
 * If the plugin doesn't load on iOS, check if the *.m files are in the project's
   "Compile Sources" list in "Build Phases".
+
+* When updating or re-adding the plugin, you may need to manually add the *.m files
+  as well as libicu.dylib, libz.dylib, and any other missing libraries.
 
 ## License
 
