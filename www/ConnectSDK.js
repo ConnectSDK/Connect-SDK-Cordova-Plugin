@@ -474,6 +474,10 @@ var DiscoveryManager = createClass(
             if (config.pairingLevel) {
                 this._setPairingLevel(config.pairingLevel, false);
             }
+
+            if (config.airPlayServiceMode) {
+                this._setAirPlayServiceMode(config.airPlayServiceMode, false);
+            }
             
             if (config.capabilityFilters) {
                 this._setCapabilityFilters(config.capabilityFilters, false);
@@ -505,6 +509,9 @@ var DiscoveryManager = createClass(
      * Set mode for AirPlay support. If set to ConnectSDK.AirPlayServiceMode.WebApp, a web app will
      * will be mirrored to the TV. If set to ConnectSDK.AirPlayServiceMode.Media, only media
      * APIs will be available. On Android, media mode is the only option.
+     *
+     * NOTE: This setting must be configured before calling startDiscovery(), or passed in the options
+     * parameter to startDiscovery(). The mode should not be changed once configured.
      */
     setAirPlayServiceMode: function (mode) {
         this._setAirPlayServiceMode(mode, true);
