@@ -258,6 +258,12 @@ public class JSCommandDispatcher {
 	}
 	
 	@CommandMethod
+	public void launcher_launchAppStore(JSCommand command, JSONObject args) throws JSONException {
+		String appId = args.optString("appId");
+		device.getLauncher().launchAppStore(appId, command.getAppLaunchListener());
+	}
+	
+	@CommandMethod
 	public void launcher_launchBrowser(JSCommand command, JSONObject args) throws JSONException {
 		String url = args.optString("url", null);
 		

@@ -1434,6 +1434,16 @@ registerDeviceInterface("launcher",
 
     /**
      * @method
+     * @param {string} appId
+     * @success {launchCallback}
+     */
+    launchAppStore: {
+        args: ["appId"],
+        responseWrapper: wrapLaunchSession
+    },
+
+    /**
+     * @method
      * @param {string} url
      * @success {launchCallback}
      */

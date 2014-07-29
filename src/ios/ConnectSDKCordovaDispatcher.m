@@ -408,6 +408,13 @@ static id orNull (id obj)
     [device.launcher closeApp:launchSession success:command.success failure:command.failure];
 }
 
+- (void) launcher_launchAppStore:(JSCommand*)command
+{
+    NSString* appId = command.args[@"appId"];
+    
+    [device.launcher launchAppStore:appId success:command.appLaunchSuccess failure:command.failure];
+}
+
 - (void) launcher_launchBrowser:(JSCommand*)command
 {
     NSString* urlString = command.args[@"url"];
