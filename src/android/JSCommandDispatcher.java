@@ -577,6 +577,24 @@ public class JSCommandDispatcher {
 		String objectId = args.getString("objectId");
 		final WebAppSessionWrapper wrapper = getWebAppSessionWrapper(objectId);
 		
+		wrapper.session.connect(command.getResponseListener());
+	}
+	
+	@CommandMethod
+	public void webAppSession_disconnect(JSCommand command, JSONObject args) throws JSONException {
+		String objectId = args.getString("objectId");
+		final WebAppSessionWrapper wrapper = getWebAppSessionWrapper(objectId);
+		
+		wrapper.session.disconnectFromWebApp();
+		
+		command.success();
+	}
+	
+	@CommandMethod
+	public void webAppSession_setWebAppSessionListener(JSCommand command, JSONObject args) throws JSONException {
+		String objectId = args.getString("objectId");
+		final WebAppSessionWrapper wrapper = getWebAppSessionWrapper(objectId);
+		
 		wrapper.session.setWebAppSessionListener(new WebAppSessionListener() {
 			@Override
 			public void onReceiveMessage(WebAppSession webAppSession, Object message) {
@@ -588,16 +606,6 @@ public class JSCommandDispatcher {
 				wrapper.sendEvent("disconnect");
 			}		
 		});
-		
-		wrapper.session.connect(command.getResponseListener());
-	}
-	
-	@CommandMethod
-	public void webAppSession_disconnect(JSCommand command, JSONObject args) throws JSONException {
-		String objectId = args.getString("objectId");
-		final WebAppSessionWrapper wrapper = getWebAppSessionWrapper(objectId);
-		
-		wrapper.session.disconnectFromWebApp();
 		
 		command.success();
 	}
