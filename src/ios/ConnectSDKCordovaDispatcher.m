@@ -975,12 +975,8 @@ static id orNull (id obj)
     if (options) {
         title = options[@"title"];
         description = options[@"description"];
-        
-        NSString* iconUrlString = options[@"url"];
-        if (iconUrl) {
-            iconUrl = [NSURL URLWithString:iconUrlString];
-        }
-        
+        iconUrl = [NSURL URLWithString:options[@"iconUrl"]];
+
         if (options[@"shouldLoop"] == [NSNumber numberWithBool:YES]) {
             shouldLoop = YES;
         }
