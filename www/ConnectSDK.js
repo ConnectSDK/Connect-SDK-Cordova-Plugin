@@ -2022,7 +2022,15 @@ registerDeviceInterface("webAppLauncher",
      */
     closeWebApp: {
         args: ["webAppId"]
-    }
+    },
+
+    pinWebApp: {
+        args: ["webAppId"]
+    },
+
+    unPinWebApp: {
+        args: ["webAppId"]
+    },
 });
 
 var ServiceWrapper = createClass({
