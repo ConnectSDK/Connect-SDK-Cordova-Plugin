@@ -729,6 +729,18 @@ static id orNull (id obj)
     [device.webAppLauncher joinWebAppWithId:command.args[@"webAppId"] success:command.webAppLaunchSuccess failure:command.failure];
 }
 
+- (void)webAppLauncher_pinWebApp:(JSCommand *)command {
+    [device.webAppLauncher pinWebApp:command.args[@"webAppId"]
+                             success:command.success
+                             failure:command.failure];
+}
+
+- (void)webAppLauncher_unPinWebApp:(JSCommand *)command {
+    [device.webAppLauncher unPinWebApp:command.args[@"webAppId"]
+                               success:command.success
+                               failure:command.failure];
+}
+
 #pragma mark - KeyControl
 
 - (void) keyControl_up:(JSCommand*)command
