@@ -560,6 +560,20 @@ public class JSCommandDispatcher {
         device.getWebAppLauncher().joinWebApp(webAppId, command.getWebAppLaunchListener());
     }
 
+    @CommandMethod
+    public void webAppLauncher_pinWebApp(JSCommand command, JSONObject args) throws JSONException {
+        String webAppId = args.getString("webAppId");
+
+        device.getWebAppLauncher().pinWebApp(webAppId, command.getResponseListener());
+    }
+
+    @CommandMethod
+    public void webAppLauncher_unPinWebApp(JSCommand command, JSONObject args) throws JSONException {
+        String webAppId = args.getString("webAppId");
+
+        device.getWebAppLauncher().unPinWebApp(webAppId, command.getResponseListener());
+    }
+
     /* WebAppSession methods */
 
     WebAppSessionWrapper getWebAppSessionWrapper(String objectId) {
