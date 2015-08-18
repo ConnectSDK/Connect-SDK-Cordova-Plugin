@@ -2035,6 +2035,11 @@ registerDeviceInterface("webAppLauncher",
     isWebAppPinned: {
         args: ["webAppId"]
     },
+
+    subscribeIsWebAppPinned: {
+        args: ["webAppId"],
+        subscribe: true
+    }
 });
 
 var ServiceWrapper = createClass({
