@@ -747,6 +747,12 @@ static id orNull (id obj)
                                   failure:command.failure];
 }
 
+- (void)webAppLauncher_subscribeIsWebAppPinned:(JSCommand *)command {
+    [device.webAppLauncher subscribeIsWebAppPinned:command.args[@"webAppId"]
+                                           success:command.successWithBool
+                                           failure:command.failure];
+}
+
 #pragma mark - KeyControl
 
 - (void) keyControl_up:(JSCommand*)command
