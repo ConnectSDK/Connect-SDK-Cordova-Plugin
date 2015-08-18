@@ -179,6 +179,12 @@ static id orNull (id obj)
     };
 }
 
+- (WebAppPinStatusBlock) webAppPinStatusSuccess {
+    return ^(BOOL status) {
+        [self sendSuccess:@(status)];
+    };
+}
+
 - (AppListSuccessBlock) appListSuccess
 {
     return ^(NSArray* appList) {
@@ -739,6 +745,12 @@ static id orNull (id obj)
     [device.webAppLauncher unPinWebApp:command.args[@"webAppId"]
                                success:command.success
                                failure:command.failure];
+}
+
+- (void)webAppLauncher_isWebAppPinned:(JSCommand *)command {
+    [device.webAppLauncher isWebAppPinned:command.args[@"webAppId"]
+                                  success:command.webAppPinStatusSuccess
+                                  failure:command.failure];
 }
 
 #pragma mark - KeyControl
