@@ -84,8 +84,12 @@ public class JSCommand {
             arr.put(o);
         }
 
-        callbackContext.success(arr);
-        checkDone();
+        if (subscription) {
+            callbackContext.successSubscription(arr);
+        } else {
+            callbackContext.success(arr);
+            checkDone();
+        }
     }
 
     public void success() {
