@@ -179,12 +179,6 @@ static id orNull (id obj)
     };
 }
 
-- (WebAppPinStatusBlock) webAppPinStatusSuccess {
-    return ^(BOOL status) {
-        [self sendSuccess:@(status)];
-    };
-}
-
 - (AppListSuccessBlock) appListSuccess
 {
     return ^(NSArray* appList) {
@@ -749,7 +743,7 @@ static id orNull (id obj)
 
 - (void)webAppLauncher_isWebAppPinned:(JSCommand *)command {
     [device.webAppLauncher isWebAppPinned:command.args[@"webAppId"]
-                                  success:command.webAppPinStatusSuccess
+                                  success:command.successWithBool
                                   failure:command.failure];
 }
 
