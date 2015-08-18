@@ -574,6 +574,43 @@ public class JSCommandDispatcher {
         device.getWebAppLauncher().unPinWebApp(webAppId, command.getResponseListener());
     }
 
+    @CommandMethod
+    public void webAppLauncher_isWebAppPinned(final JSCommand command, JSONObject args) throws JSONException {
+        String webAppId = args.getString("webAppId");
+
+        device.getWebAppLauncher().isWebAppPinned(webAppId, new WebAppSession
+                .WebAppPinStatusListener() {
+            @Override
+            public void onSuccess(Boolean object) {
+                command.success(object);
+            }
+
+            @Override
+            public void onError(ServiceCommandError error) {
+                command.error(error);
+            }
+        });
+    }
+
+    @CommandMethod
+    public ServiceSubscription<?> webAppLauncher_subscribeIsWebAppPinned(final JSCommand command, JSONObject args) throws JSONException {
+        String webAppId = args.getString("webAppId");
+
+        return device.getWebAppLauncher().subscribeIsWebAppPinned(webAppId, new WebAppSession.WebAppPinStatusListener() {
+
+            @Override
+            public void onSuccess(Boolean object) {
+                command.success(object);
+            }
+
+            @Override
+            public void onError(ServiceCommandError error) {
+                command.error(error);
+            }
+        });
+    }
+
+
     /* WebAppSession methods */
 
     WebAppSessionWrapper getWebAppSessionWrapper(String objectId) {
