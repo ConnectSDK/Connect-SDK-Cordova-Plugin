@@ -147,18 +147,19 @@ static id orNull (id obj)
     };
 }
 
-- (MediaPlayerDisplaySuccessBlock) mediaLaunchSuccess
+- (MediaPlayerSuccessBlock) mediaLaunchSuccess
 {
-    return ^(LaunchSession* session, id<MediaControl> control) {
+    return ^(MediaLaunchObject *mediaLaunchObject) {
         NSMutableDictionary* mediaControlObj = [NSMutableDictionary dictionary]; // TODO media control details
         
-        MediaControlWrapper* controlWrapper = [[MediaControlWrapper alloc] initWithPlugin:self.plugin mediaControl:control];
+        MediaControlWrapper* controlWrapper = [[MediaControlWrapper alloc] initWithPlugin:self.plugin
+                                                                             mediaControl:mediaLaunchObject.mediaControl];
         [self.plugin addObjectWrapper:controlWrapper];
         
         mediaControlObj[@"objectId"] = controlWrapper.objectId;
         
         NSArray* result = @[
-            [session toJSONObject],
+            [mediaLaunchObject.session toJSONObject],
             mediaControlObj
         ];
         
@@ -987,29 +988,45 @@ static id orNull (id obj)
 
 - (void) displayMediaCommon:(JSCommand*)command type:(NSString*)type
 {
-    NSURL* url = [NSURL URLWithString:command.args[@"url"]];
-    NSString* mimeType = command.args[@"mimeType"];
-    NSDictionary* options = command.args[@"options"];
-    
-    NSString* title = nil;
-    NSString* description = nil;
-    NSURL* iconUrl = nil;
+    MediaInfo *mediaInfo = [[MediaInfo alloc]
+        initWithURL:[NSURL URLWithString:command.args[@"url"]]
+           mimeType:command.args[@"mimeType"]];
     BOOL shouldLoop = NO;
-    
+
+    NSDictionary* options = command.args[@"options"];
     if (options) {
-        title = options[@"title"];
-        description = options[@"description"];
-        iconUrl = [NSURL URLWithString:options[@"iconUrl"]];
+        mediaInfo.title = options[@"title"];
+        mediaInfo.description = options[@"description"];
+
+        ImageInfo *imageInfo = [[ImageInfo alloc]
+            initWithURL:[NSURL URLWithString:options[@"iconUrl"]]
+                   type:ImageTypeAlbumArt];
+        [mediaInfo addImage:imageInfo];
 
         if (options[@"shouldLoop"] == [NSNumber numberWithBool:YES]) {
             shouldLoop = YES;
         }
+
+        NSDictionary *subtitleDict = options[@"subtitles"];
+        if (subtitleDict) {
+            mediaInfo.subtitleInfo = [SubtitleInfo infoWithURL:[NSURL URLWithString:subtitleDict[@"url"]]
+                                                      andBlock:^(SubtitleInfoBuilder *builder) {
+                                                          builder.mimeType = subtitleDict[@"mimeType"];
+                                                          builder.language = subtitleDict[@"language"];
+                                                          builder.label = subtitleDict[@"label"];
+                                                      }];
+        }
     }
-    
+
     if ([type isEqualToString:@"image"]) {
-        [device.mediaPlayer displayImage:url iconURL:iconUrl title:title description:description mimeType:mimeType success:command.mediaLaunchSuccess failure:command.failure];
+        [device.mediaPlayer displayImageWithMediaInfo:mediaInfo
+                                              success:command.mediaLaunchSuccess
+                                              failure:command.failure];
     } else {
-        [device.mediaPlayer playMedia:url iconURL:iconUrl title:title description:description mimeType:mimeType shouldLoop:shouldLoop success:command.mediaLaunchSuccess failure:command.failure];
+        [device.mediaPlayer playMediaWithMediaInfo:mediaInfo
+                                        shouldLoop:shouldLoop
+                                           success:command.mediaLaunchSuccess
+                                           failure:command.failure];
     }
 }
 

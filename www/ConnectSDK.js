@@ -1542,6 +1542,12 @@ registerDeviceInterface("mediaPlayer",
      *   - description (string): Description paragraph to display
      *   - iconUrl (string): URL of icon to show next to the title
      *   - shouldLoop (boolean): Whether to automatically loop playback
+     *   - subtitles {object} subtitle track with options (properties are
+     *      optional unless specified otherwise):
+     *      - url (string) [required]: must be a valid URL
+     *      - mimeType (string)
+     *      - language (string)
+     *      - label (string)
      * @success {mediaLaunchCallback}
      */
     playMedia: {

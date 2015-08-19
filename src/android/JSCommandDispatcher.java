@@ -36,6 +36,8 @@ import android.util.Log;
 import com.connectsdk.core.AppInfo;
 import com.connectsdk.core.ChannelInfo;
 import com.connectsdk.core.ExternalInputInfo;
+import com.connectsdk.core.MediaInfo;
+import com.connectsdk.core.SubtitleInfo;
 import com.connectsdk.core.TextInputStatusInfo;
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.service.DeviceService;
@@ -44,6 +46,7 @@ import com.connectsdk.service.capability.ExternalInputControl.ExternalInputListL
 import com.connectsdk.service.capability.MediaControl;
 import com.connectsdk.service.capability.MediaControl.DurationListener;
 import com.connectsdk.service.capability.MediaControl.PositionListener;
+import com.connectsdk.service.capability.MediaPlayer;
 import com.connectsdk.service.capability.TextInputControl;
 import com.connectsdk.service.capability.WebAppLauncher;
 import com.connectsdk.service.command.ServiceCommandError;
@@ -655,7 +658,7 @@ public class JSCommandDispatcher {
             @Override
             public void onWebAppSessionDisconnect(WebAppSession webAppSession) {
                 wrapper.sendEvent("disconnect");
-            }		
+            }
         });
 
         command.success();
@@ -725,15 +728,42 @@ public class JSCommandDispatcher {
     void displayMedia(JSCommand command, JSONObject args, String type) throws JSONException {
         String url = args.getString("url");
         String mimeType = args.getString("mimeType");
-        String title = args.optString("title");
-        String description = args.optString("description");
-        String iconSrc = args.optString("iconUrl");
-        boolean shouldLoop = args.optBoolean("shouldLoop");
+
+        String title = null;
+        String description = null;
+        String iconSrc = null;
+        boolean shouldLoop = false;
+        SubtitleInfo subtitles = null;
+
+        JSONObject options = args.optJSONObject("options");
+        if (options != null) {
+            title = options.optString("title");
+            description = options.optString("description");
+            iconSrc = options.optString("iconUrl");
+            shouldLoop = options.optBoolean("shouldLoop");
+            JSONObject subtitlesJson = options.optJSONObject("subtitles");
+            if (subtitlesJson != null) {
+                subtitles = new SubtitleInfo.Builder(subtitlesJson.getString("url"))
+                        .setLabel(subtitlesJson.optString("label"))
+                        .setLanguage(subtitlesJson.optString("language"))
+                        .setMimeType(subtitlesJson.optString("mimeType"))
+                        .build();
+            }
+        }
+
+        MediaInfo mediaInfo = new MediaInfo.Builder(url, mimeType)
+                .setTitle(title)
+                .setDescription(description)
+                .setIcon(iconSrc)
+                .setSubtitleInfo(subtitles)
+                .build();
 
         if ("image".equals(type)) {
-            device.getMediaPlayer().displayImage(url, mimeType, title, description, iconSrc, command.getMediaLaunchListener());
+            device.getCapability(MediaPlayer.class).displayImage(mediaInfo,
+                    command.getMediaLaunchListener());
         } else {
-            device.getMediaPlayer().playMedia(url, mimeType, title, description, iconSrc, shouldLoop, command.getMediaLaunchListener());
+            device.getCapability(MediaPlayer.class).playMedia(mediaInfo, shouldLoop,
+                    command.getMediaLaunchListener());
         }
     }
 
