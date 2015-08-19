@@ -2022,6 +2022,41 @@ registerDeviceInterface("webAppLauncher",
      */
     closeWebApp: {
         args: ["webAppId"]
+    },
+
+    /**
+     * @method
+     * @param {string} webAppId
+     */
+    pinWebApp: {
+        args: ["webAppId"]
+    },
+
+    /**
+     * @method
+     * @param {string} webAppId
+     */
+    unPinWebApp: {
+        args: ["webAppId"]
+    },
+
+    /**
+     * @method
+     * @param {string} webAppId
+     * @success {isWebAppPinnedCallback}
+     */
+    isWebAppPinned: {
+        args: ["webAppId"]
+    },
+
+    /**
+     * @method
+     * @param {string} webAppId
+     * @success {subscribeIsWebAppPinnedCallback}
+     */
+    subscribeIsWebAppPinned: {
+        args: ["webAppId"],
+        subscribe: true
     }
 });
 
