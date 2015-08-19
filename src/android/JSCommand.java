@@ -22,6 +22,7 @@ package com.connectsdk.cordova;
 import java.util.List;
 
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,7 +86,9 @@ public class JSCommand {
         }
 
         if (subscription) {
-            callbackContext.successSubscription(arr);
+            PluginResult pendingResult = new PluginResult(PluginResult.Status.OK, arr);
+            pendingResult.setKeepCallback(true);
+            callbackContext.sendPluginResult(pendingResult);
         } else {
             callbackContext.success(arr);
             checkDone();
