@@ -964,20 +964,19 @@ static id orNull (id obj)
 
 - (void) displayMediaCommon:(JSCommand*)command type:(NSString*)type
 {
-    NSURL* url = [NSURL URLWithString:command.args[@"url"]];
-    NSString* mimeType = command.args[@"mimeType"];
-    NSDictionary* options = command.args[@"options"];
-
-    MediaInfo *mediaInfo = [[MediaInfo alloc] initWithURL:url mimeType:mimeType];
+    MediaInfo *mediaInfo = [[MediaInfo alloc]
+        initWithURL:[NSURL URLWithString:command.args[@"url"]]
+           mimeType:command.args[@"mimeType"]];
     BOOL shouldLoop = NO;
-    
+
+    NSDictionary* options = command.args[@"options"];
     if (options) {
         mediaInfo.title = options[@"title"];
         mediaInfo.description = options[@"description"];
 
-        NSURL *iconUrl = [NSURL URLWithString:options[@"iconUrl"]];
-        ImageInfo *imageInfo = [[ImageInfo alloc] initWithURL:iconUrl
-                                                         type:ImageTypeAlbumArt];
+        ImageInfo *imageInfo = [[ImageInfo alloc]
+            initWithURL:[NSURL URLWithString:options[@"iconUrl"]]
+                   type:ImageTypeAlbumArt];
         [mediaInfo addImage:imageInfo];
 
         if (options[@"shouldLoop"] == [NSNumber numberWithBool:YES]) {
