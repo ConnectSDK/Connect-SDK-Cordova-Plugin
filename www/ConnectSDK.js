@@ -1225,6 +1225,39 @@ var MediaControlWrapper = createClass(
 });
 
 /**
+ * @class PlaylistControlWrapper
+ */
+var PlaylistControlWrapper = createClass(
+/** @lends MediaControl.prototype */
+{
+    mixins: [SimpleEventEmitter, WrappedObject],
+
+    constructor: function (device, data) {
+        this._device = device;
+        this._data = data;
+        this._objectId = data.objectId;
+    },
+
+    _sendCommand: function (command, params) {
+        params = params || {};
+        params.objectId = this._objectId;
+        return this._device._sendCommand("playlistControl", command, params);
+    },
+
+    next: function() {
+        return this._sendCommand("next");
+    },
+
+    previous: function() {
+        return this._sendCommand("previous");
+    },
+
+    jumpToTrack: function () {
+        return this._sendCommand("jumpToTrack");
+    }
+});
+
+/**
  * @class WebAppSession
  * @mixes SimpleEventEmitter
  * @mixes WrappedObject
