@@ -313,6 +313,22 @@ var PairingLevel = {
 
 /**
  * @constant
+ * @property {string} NONE - Only connect if no pairing is required
+ * @property {string} FIRST_SCREEN - Prompt the user on the TV to accept paring
+ * @property {string} PIN - Display a PIN on the TV, require user to enter it on the device
+ * @property {string} MIXED - Prompt the user on the TV to accept pairing. Also display a pin on the TV that the user can enter on the device.
+ * @property {string} AIRPLAY_MIRRORING - Require AirPlay mirroring to be enabled for connection
+ */
+var PairingType = {
+    NONE: "",
+    FIRST_SCREEN: "",
+    PIN: "",
+    MIXED: "",
+    AIRPLAY_MIRRORING: ""
+};
+
+/**
+ * @constant
  * @property {string} WEBAPP - display media using a web app mirrored to the TV (iOS only)
  * @property {string} MEDIA - display media using AirPlay media playback APIs
  */
@@ -761,6 +777,9 @@ var ConnectableDevice = createClass(
 
     _handleError: function (error) {
         this.emit("error", error);
+    },
+
+    _setPairingType: function (args) {
     },
 
     /**
@@ -2108,6 +2127,7 @@ exports.DevicePicker = DevicePicker;
 exports.ConnectableDevice = ConnectableDevice;
 exports.CapabilityFilter = CapabilityFilter;
 exports.PairingLevel = PairingLevel;
+exports.PairingType = PairingType;
 exports.AirPlayServiceMode = AirPlayServiceMode;
 exports.Services = Services;
 
