@@ -797,6 +797,15 @@ var ConnectableDevice = createClass(
     },
 
     /**
+     * Set a desirable pairing type to the device.
+     * @param pairingType (string): PairingType to use
+     */
+    setPairingType: function (pairingType) {
+        cordova.exec(this._handleUpdate.bind(this), this._handleError.bind(this), PLUGIN_ID, "setPairingType", [this._deviceId, pairingType]);
+    },
+
+
+    /**
      * Returns true if device is ready to use.
      */
     isReady: function () {
