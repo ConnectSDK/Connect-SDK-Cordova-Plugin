@@ -35,10 +35,14 @@ import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.device.SimpleDevicePicker;
 import com.connectsdk.device.SimpleDevicePickerListener;
 import com.connectsdk.discovery.DiscoveryManager;
+import com.connectsdk.service.DeviceService;
 import com.connectsdk.service.command.ServiceCommandError;
 
 public class ConnectSDKCordova extends CordovaPlugin {
     static final String LOG_TAG = "ConnectSDKCordova";
+    public static final String JS_PAIRING_TYPE_FIRST_SCREEN = "FIRST_SCREEN";
+    public static final String JS_PAIRING_TYPE_PIN = "PIN";
+    public static final String JS_PAIRING_TYPE_MIXED = "MIXED";
 
     DiscoveryManager discoveryManager;
     DiscoveryManagerWrapper discoveryManagerWrapper;
@@ -85,7 +89,6 @@ public class ConnectSDKCordova extends CordovaPlugin {
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         try {
-
             if ("sendCommand".equals(action)) {
                 ConnectableDeviceWrapper deviceWrapper = getDeviceWrapper(args.getString(0));
 
@@ -124,6 +127,11 @@ public class ConnectSDKCordova extends CordovaPlugin {
                 ConnectableDeviceWrapper deviceWrapper = getDeviceWrapper(args.getString(0));
                 deviceWrapper.setCallbackContext(callbackContext);
                 deviceWrapper.connect();
+                return true;
+            } else if ("setPairingType".equals(action)) {
+                ConnectableDeviceWrapper deviceWrapper = getDeviceWrapper(args.getString(0));
+                deviceWrapper.setCallbackContext(callbackContext);
+                deviceWrapper.setPairingType(getPairingTypeFromString(args.getString(1)));
                 return true;
             } else if ("disconnectDevice".equals(action)) {
                 ConnectableDeviceWrapper deviceWrapper = getDeviceWrapper(args.getString(0));
@@ -198,13 +206,20 @@ public class ConnectSDKCordova extends CordovaPlugin {
     }
 
     void pickDevice(JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        JSONObject options = args.optJSONObject(0);
+        String pairingTypeString = null;
+        if (options != null) {
+            pairingTypeString = options.optString("pairingType");
+        }
+
         if (discoveryManager != null) {
+            final DeviceService.PairingType pairingType = getPairingTypeFromString(pairingTypeString);
 
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     SimpleDevicePicker picker = new SimpleDevicePicker(cordova.getActivity());
-
+                    picker.setPairingType(pairingType);
                     picker.setListener(new SimpleDevicePickerListener() {
                         @Override
                         public void onPrepareDevice(ConnectableDevice device) {
@@ -271,5 +286,16 @@ public class ConnectSDKCordova extends CordovaPlugin {
     public void removeObjectWrapper(JSObjectWrapper wrapper) {
         objectWrappers.remove(wrapper.objectId);
         wrapper.cleanup();
+    }
+
+    private DeviceService.PairingType getPairingTypeFromString(String pairingTypeString) {
+        if (JS_PAIRING_TYPE_FIRST_SCREEN.equalsIgnoreCase(pairingTypeString)) {
+            return DeviceService.PairingType.FIRST_SCREEN;
+        } else if (JS_PAIRING_TYPE_PIN.equalsIgnoreCase(pairingTypeString)) {
+            return DeviceService.PairingType.PIN_CODE;
+        } else if (JS_PAIRING_TYPE_MIXED.equalsIgnoreCase(pairingTypeString)) {
+            return DeviceService.PairingType.MIXED;
+        }
+        return DeviceService.PairingType.NONE;
     }
 }
