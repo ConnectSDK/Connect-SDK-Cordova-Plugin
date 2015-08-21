@@ -199,8 +199,9 @@ public class JSCommandDispatcher {
 
     @CommandMethod
     public void keyControl_sendKeyCode(JSCommand command, JSONObject args) throws JSONException {
-        String keyCode = args.getString("keyCode");
-        device.getKeyControl().sendKeyCode(KeyCode.valueOf(keyCode), command.getResponseListener());
+        int keyCode = args.getInt("keyCode");
+        device.getKeyControl().sendKeyCode(KeyCode.createFromInteger(keyCode),
+                command.getResponseListener());
     }
 
     /* TextInputControl methods */
