@@ -533,6 +533,38 @@ static id orNull (id obj)
     return [mediaControl subscribePlayStateWithSuccess:command.playStateSuccess failure:command.failure];
 }
 
+#pragma mark - PlayListControl
+
+- (void)playlistControl_next:(JSCommand *)command {
+    id<PlayListControl> playlistControl = [self playlistControlFromCommand:command];
+    if (playlistControl) {
+        [playlistControl playNextWithSuccess:command.success
+                                     failure:command.failure];
+    }
+}
+
+- (void)playlistControl_previous:(JSCommand *)command {
+    id<PlayListControl> playlistControl = [self playlistControlFromCommand:command];
+    if (playlistControl) {
+        [playlistControl playPreviousWithSuccess:command.success
+                                         failure:command.failure];
+    }
+}
+
+- (void)playlistControl_jumpToTrack:(JSCommand *)command {
+    id<PlayListControl> playlistControl = [self playlistControlFromCommand:command];
+    if (playlistControl) {
+        NSNumber *indexNumber = command.args[@"index"];
+        if (indexNumber) {
+            [playlistControl jumpToTrackWithIndex:[indexNumber integerValue]
+                                          success:command.success
+                                          failure:command.failure];
+        } else {
+            [command sendErrorMessage:@"index cannot be nil"];
+        }
+    }
+}
+
 #pragma mark - MediaPlayer
 
 - (void) mediaPlayer_displayImage:(JSCommand*)command
@@ -963,6 +995,23 @@ static id orNull (id obj)
     } else {
         return device.mediaControl;
     }
+}
+
+- (id<PlayListControl>) playlistControlFromCommand:(JSCommand*)command
+{
+    NSString* objectId = command.args[@"objectId"];
+    if (objectId) {
+        PlaylistControlWrapper *wrapper = [command.plugin getObjectWrapper:objectId];
+        if (wrapper) {
+            return wrapper.playlistControl;
+        }
+
+        [command sendErrorMessage:@"invalid PlaylistControl object"];
+    } else {
+        [command sendErrorMessage:@"PlaylistControl not found for device"];
+    }
+
+    return nil;
 }
 
 - (AppInfo*) parseAppInfo:(NSObject*)obj
