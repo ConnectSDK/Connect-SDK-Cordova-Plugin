@@ -302,6 +302,7 @@ public class JSCommand {
                 // FIXME include media control
                 JSONObject launchSessionObj = null;
                 JSONObject mediaControlObj = null;
+                JSONObject playlistControlObj = null;
 
                 try {
                     launchSessionObj = object.launchSession.toJSONObject();
@@ -310,14 +311,19 @@ public class JSCommand {
                     if (object.mediaControl != null) {
                         MediaControlWrapper mediaControlWrapper = new MediaControlWrapper(deviceWrapper.plugin, object.mediaControl);
                         deviceWrapper.plugin.addObjectWrapper(mediaControlWrapper);
-
                         mediaControlObj = mediaControlWrapper.toJSONObject();
+                    }
+
+                    if (object.playlistControl != null) {
+                        PlaylistControlWrapper playlistControlWrapper = new PlaylistControlWrapper(deviceWrapper.plugin, object.playlistControl);
+                        deviceWrapper.plugin.addObjectWrapper(playlistControlWrapper);
+                        playlistControlObj = playlistControlWrapper.toJSONObject();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-                sendSuccessEvent(launchSessionObj, mediaControlObj);
+                sendSuccessEvent(launchSessionObj, mediaControlObj, playlistControlObj);
             }
 
             @Override
