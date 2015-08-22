@@ -317,7 +317,7 @@ var PairingLevel = {
  * @property {string} FIRST_SCREEN - Prompt the user on the TV to accept paring
  * @property {string} PIN - Display a PIN on the TV, require user to enter it on the device
  * @property {string} MIXED - Prompt the user on the TV to accept pairing. Also display a pin on the TV that the user can enter on the device.
- * @property {string} AIRPLAY_MIRRORING - Require AirPlay mirroring to be enabled for connection
+ * @property {string} AIRPLAY_MIRRORING - Require AirPlay mirroring to be enabled for connection (iOS only)
  */
 var PairingType = {
     NONE: "NONE",
