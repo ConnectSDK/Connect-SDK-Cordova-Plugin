@@ -1252,8 +1252,8 @@ var PlaylistControlWrapper = createClass(
         return this._sendCommand("previous");
     },
 
-    jumpToTrack: function () {
-        return this._sendCommand("jumpToTrack");
+    jumpToTrack: function (index) {
+        return this._sendCommand("jumpToTrack", {"index": index});
     }
 });
 
