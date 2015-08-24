@@ -157,10 +157,20 @@ static id orNull (id obj)
         [self.plugin addObjectWrapper:controlWrapper];
         
         mediaControlObj[@"objectId"] = controlWrapper.objectId;
-        
+
+        NSDictionary *playlistControlObj;
+        if (mediaLaunchObject.playListControl) {
+            PlaylistControlWrapper *playlistControlWrapper = [[PlaylistControlWrapper alloc]
+                initWithPlugin:self.plugin
+               playlistControl:mediaLaunchObject.playListControl];
+            [self.plugin addObjectWrapper:playlistControlWrapper];
+            playlistControlObj = @{@"objectId": playlistControlWrapper.objectId};
+        }
+
         NSArray* result = @[
             [mediaLaunchObject.session toJSONObject],
-            mediaControlObj
+            mediaControlObj,
+            playlistControlObj,
         ];
         
         [self sendSuccessWithArray:result];
