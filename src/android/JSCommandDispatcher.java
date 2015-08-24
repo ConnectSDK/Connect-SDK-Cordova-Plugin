@@ -43,6 +43,7 @@ import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.service.DeviceService;
 import com.connectsdk.service.WebOSTVService;
 import com.connectsdk.service.capability.ExternalInputControl.ExternalInputListListener;
+import com.connectsdk.service.capability.Launcher;
 import com.connectsdk.service.capability.MediaControl;
 import com.connectsdk.service.capability.MediaControl.DurationListener;
 import com.connectsdk.service.capability.MediaControl.PositionListener;
@@ -135,7 +136,7 @@ public class JSCommandDispatcher {
 
     @CommandMethod
     public void externalInputControl_getExternalInputList(final JSCommand command, JSONObject args) throws JSONException {
-        device.getExternalInputControl().getExternalInputList(new ExternalInputListListener () {
+        device.getExternalInputControl().getExternalInputList(new ExternalInputListListener() {
             @Override
             public void onSuccess(List<ExternalInputInfo> list) {
                 command.success(list);
@@ -836,7 +837,8 @@ public class JSCommandDispatcher {
                 command.error("toast options must include url or appId when showing a clickable toast");
             }
         } else {
-            device.getToastControl().showToast(message, iconData, iconExtension, command.getResponseListener());
+            device.getToastControl().showToast(message, iconData, iconExtension, command
+                    .getResponseListener());
         }
     }
 
@@ -853,9 +855,8 @@ public class JSCommandDispatcher {
     }
 
     MediaControl getMediaControl(JSCommand command, JSONObject args) throws JSONException {
-        String objectId = args.optString("objectId");
-
-        if (objectId != null) {
+        if (args.has("objectId")) {
+            String objectId = args.optString("objectId");
             MediaControlWrapper wrapper = (MediaControlWrapper) plugin.getObjectWrapper(objectId);
 
             if (wrapper != null) {
@@ -869,9 +870,8 @@ public class JSCommandDispatcher {
     }
 
     PlaylistControl getPlaylistControl(JSCommand command, JSONObject args) throws JSONException {
-        String objectId = args.optString("objectId");
-
-        if (objectId != null) {
+        if (args.has("objectId")) {
+            String objectId = args.optString("objectId");
             PlaylistControlWrapper wrapper = (PlaylistControlWrapper) plugin.getObjectWrapper(objectId);
 
             if (wrapper != null) {
