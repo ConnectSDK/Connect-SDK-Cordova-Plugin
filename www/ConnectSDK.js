@@ -1374,8 +1374,10 @@ function wrapLaunchSession(device, launchSessionData) {
     return [new LaunchSession(device, launchSessionData)];
 }
 
-function wrapMediaLaunchSession(device, launchSessionData, mediaControlData) {
-    return [new LaunchSession(device, launchSessionData), mediaControlData && new MediaControlWrapper(device, mediaControlData)];
+function wrapMediaLaunchSession(device, launchSessionData, mediaControlData, playlistControlData) {
+    return [new LaunchSession(device, launchSessionData),
+        mediaControlData && new MediaControlWrapper(device, mediaControlData),
+        playlistControlData && new PlaylistControlWrapper(device, playlistControlData)];
 }
 
 function wrapWebAppSession(device, sessionData) {
