@@ -1212,7 +1212,7 @@ var MediaControlWrapper = createClass(
     },
 
     getDuration: function () {
-        return this._sendCommand("getPosition");
+        return this._sendCommand("getDuration");
     },
 
     getPosition: function () {
