@@ -266,7 +266,7 @@ static id orNull (id obj)
             NSDictionary* obj = @{
                 @"id": orNull(info.id),
                 @"name": orNull(info.name),
-                @"iconURL": orNull(info.iconURL)
+                @"iconURL": orNull(info.iconURL.absoluteString)
             };
             
             [objs addObject:obj];
