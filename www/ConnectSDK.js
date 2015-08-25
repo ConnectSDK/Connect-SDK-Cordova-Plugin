@@ -1606,7 +1606,9 @@ registerDeviceInterface("externalInputControl",
     /**
      * @method
      */
-    showExternalInputPicker: {}
+    showExternalInputPicker: {
+        responseWrapper: wrapLaunchSession
+    }
 });
 
 /**
