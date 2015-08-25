@@ -1601,7 +1601,12 @@ registerDeviceInterface("externalInputControl",
      */
     setExternalInput: {
         args: ["externalInputInfo"]
-    }
+    },
+
+    /**
+     * @method
+     */
+    showExternalInputPicker: {}
 });
 
 /**
