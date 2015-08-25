@@ -134,7 +134,7 @@ public class JSCommandDispatcher {
 
     @CommandMethod
     public void externalInputControl_getExternalInputList(final JSCommand command, JSONObject args) throws JSONException {
-        device.getExternalInputControl().getExternalInputList(new ExternalInputListListener () {
+        device.getExternalInputControl().getExternalInputList(new ExternalInputListListener() {
             @Override
             public void onSuccess(List<ExternalInputInfo> list) {
                 command.success(list);
@@ -469,17 +469,12 @@ public class JSCommandDispatcher {
     @CommandMethod
     public void TVControl_setChannel(JSCommand command, JSONObject args) throws JSONException {
         JSONObject channelInfoObj = args.getJSONObject("channelInfo");
-
         String channelId = channelInfoObj.optString("id");
         String channelNumber = channelInfoObj.optString("number");
 
         ChannelInfo channelInfo = new ChannelInfo();
-
-        if (channelId != null && channelId.length() > 0) {
-            channelInfo.setId(channelId);
-        } else {
-            channelInfo.setNumber(channelNumber);
-        }
+        channelInfo.setId(channelId);
+        channelInfo.setNumber(channelNumber);
 
         device.getTVControl().setChannel(channelInfo, command.getResponseListener());
     }
