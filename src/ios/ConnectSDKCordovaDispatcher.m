@@ -575,7 +575,7 @@ static id orNull (id obj)
 
 - (void) volumeControl_setMute:(JSCommand*)command
 {
-    BOOL mute = [(NSNumber*)command.args[@"volume"] boolValue];
+    BOOL mute = [(NSNumber*)command.args[@"mute"] boolValue];
     [device.volumeControl setMute:mute success:command.success failure:command.failure];
 }
 
