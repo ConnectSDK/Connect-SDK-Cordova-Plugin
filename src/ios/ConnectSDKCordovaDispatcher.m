@@ -170,7 +170,7 @@ static id orNull (id obj)
         NSArray* result = @[
             [mediaLaunchObject.session toJSONObject],
             mediaControlObj,
-            playlistControlObj,
+            orNull(playlistControlObj),
         ];
         
         [self sendSuccessWithArray:result];
