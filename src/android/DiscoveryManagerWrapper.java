@@ -34,8 +34,6 @@ import com.connectsdk.discovery.DiscoveryManager.PairingLevel;
 import com.connectsdk.discovery.DiscoveryManagerListener;
 import com.connectsdk.service.command.ServiceCommandError;
 
-import android.util.Log;
-
 public class DiscoveryManagerWrapper implements DiscoveryManagerListener {
     ConnectSDKCordova plugin;
     DiscoveryManager discoveryManager;
