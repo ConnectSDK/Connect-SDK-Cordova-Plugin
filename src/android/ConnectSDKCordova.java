@@ -258,7 +258,9 @@ public class ConnectSDKCordova extends CordovaPlugin {
                 e.printStackTrace();
             }
 
-            sendEvent(callbackContext, "error", errorObj);
+            PluginResult result = new PluginResult(PluginResult.Status.ERROR, errorObj);
+            result.setKeepCallback(true);
+            callbackContext.sendPluginResult(result);
         }
     }
 
