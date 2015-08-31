@@ -46,6 +46,7 @@ public class ConnectSDKCordova extends CordovaPlugin {
     LinkedHashMap<ConnectableDevice, ConnectableDeviceWrapper> deviceWrapperByDevice = new LinkedHashMap<ConnectableDevice, ConnectableDeviceWrapper>();
 
     HashMap<String, JSObjectWrapper> objectWrappers = new HashMap<String, JSObjectWrapper>();
+    private SimpleDevicePicker picker;
 
     class NoSuchDeviceException extends Exception {
         private static final long serialVersionUID = 1L;
@@ -203,8 +204,9 @@ public class ConnectSDKCordova extends CordovaPlugin {
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    SimpleDevicePicker picker = new SimpleDevicePicker(cordova.getActivity());
-
+                    if (picker == null) {
+                        picker = new SimpleDevicePicker(cordova.getActivity());
+                    }
                     picker.setListener(new SimpleDevicePickerListener() {
                         @Override
                         public void onPrepareDevice(ConnectableDevice device) {
@@ -271,5 +273,15 @@ public class ConnectSDKCordova extends CordovaPlugin {
     public void removeObjectWrapper(JSObjectWrapper wrapper) {
         objectWrappers.remove(wrapper.objectId);
         wrapper.cleanup();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (picker != null) {
+            picker.hidePairingDialog();
+            picker.hidePicker();
+            picker = null;
+        }
     }
 }
