@@ -43,6 +43,7 @@ import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.service.DeviceService;
 import com.connectsdk.service.WebOSTVService;
 import com.connectsdk.service.capability.ExternalInputControl.ExternalInputListListener;
+import com.connectsdk.service.capability.KeyControl.KeyCode;
 import com.connectsdk.service.capability.MediaControl;
 import com.connectsdk.service.capability.MediaControl.DurationListener;
 import com.connectsdk.service.capability.MediaControl.PositionListener;
@@ -194,6 +195,13 @@ public class JSCommandDispatcher {
     @CommandMethod
     public void keyControl_home(JSCommand command, JSONObject args) throws JSONException {
         device.getKeyControl().home(command.getResponseListener());
+    }
+
+    @CommandMethod
+    public void keyControl_sendKeyCode(JSCommand command, JSONObject args) throws JSONException {
+        int keyCode = args.getInt("keyCode");
+        device.getKeyControl().sendKeyCode(KeyCode.createFromInteger(keyCode),
+                command.getResponseListener());
     }
 
     /* TextInputControl methods */

@@ -339,6 +339,21 @@ var Services = {
     WebOSTV: "webOS TV",
 };
 
+var KeyCodes = {
+    NUM_0: 0,
+    NUM_1: 1,
+    NUM_2: 2,
+    NUM_3: 3,
+    NUM_4: 4,
+    NUM_5: 5,
+    NUM_6: 6,
+    NUM_7: 7,
+    NUM_8: 8,
+    NUM_9: 9,
+    DASH: 10,
+    ENTER: 11
+};
+
 /**
  * @class DiscoveryManager
  * @classdesc ConnectSDK.discoveryManager is the main entry point into ConnectSDK.
@@ -2110,6 +2125,7 @@ exports.CapabilityFilter = CapabilityFilter;
 exports.PairingLevel = PairingLevel;
 exports.AirPlayServiceMode = AirPlayServiceMode;
 exports.Services = Services;
+exports.KeyCodes = KeyCodes;
 
 // Singleton instance
 exports.discoveryManager = new DiscoveryManager();
