@@ -114,8 +114,9 @@ public class DiscoveryManagerWrapper implements DiscoveryManagerListener {
 
     @Override
     public void onDiscoveryFailed(DiscoveryManager manager, ServiceCommandError error) {
-        // TODO Auto-generated method stub
-
+        if (callbackContext != null) {
+            plugin.sendErrorEvent(callbackContext, error);
+        }
     }
 
     public JSONObject getDeviceJSON(ConnectableDevice device) {

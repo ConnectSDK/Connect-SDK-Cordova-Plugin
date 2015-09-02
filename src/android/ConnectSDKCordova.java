@@ -50,6 +50,7 @@ public class ConnectSDKCordova extends CordovaPlugin {
     LinkedHashMap<ConnectableDevice, ConnectableDeviceWrapper> deviceWrapperByDevice = new LinkedHashMap<ConnectableDevice, ConnectableDeviceWrapper>();
 
     HashMap<String, JSObjectWrapper> objectWrappers = new HashMap<String, JSObjectWrapper>();
+    private SimpleDevicePicker picker;
 
     class NoSuchDeviceException extends Exception {
         private static final long serialVersionUID = 1L;
@@ -218,8 +219,12 @@ public class ConnectSDKCordova extends CordovaPlugin {
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    SimpleDevicePicker picker = new SimpleDevicePicker(cordova.getActivity());
+                    if (picker == null) {
+                        picker = new SimpleDevicePicker(cordova.getActivity());
+                    }
+
                     picker.setPairingType(pairingType);
+
                     picker.setListener(new SimpleDevicePickerListener() {
                         @Override
                         public void onPrepareDevice(ConnectableDevice device) {
@@ -271,7 +276,9 @@ public class ConnectSDKCordova extends CordovaPlugin {
                 e.printStackTrace();
             }
 
-            sendEvent(callbackContext, "error", errorObj);
+            PluginResult result = new PluginResult(PluginResult.Status.ERROR, errorObj);
+            result.setKeepCallback(true);
+            callbackContext.sendPluginResult(result);
         }
     }
 
@@ -288,6 +295,7 @@ public class ConnectSDKCordova extends CordovaPlugin {
         wrapper.cleanup();
     }
 
+<<<<<<< HEAD
     private DeviceService.PairingType getPairingTypeFromString(String pairingTypeString) {
         if (JS_PAIRING_TYPE_FIRST_SCREEN.equalsIgnoreCase(pairingTypeString)) {
             return DeviceService.PairingType.FIRST_SCREEN;
@@ -297,5 +305,15 @@ public class ConnectSDKCordova extends CordovaPlugin {
             return DeviceService.PairingType.MIXED;
         }
         return DeviceService.PairingType.NONE;
+=======
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (picker != null) {
+            picker.hidePairingDialog();
+            picker.hidePicker();
+            picker = null;
+        }
+>>>>>>> dev
     }
 }
