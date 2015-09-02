@@ -715,6 +715,11 @@ static id orNull (id obj)
     [device.externalInputControl setExternalInput:externalInputInfo success:command.success failure:command.failure];
 }
 
+- (void)externalInputControl_showExternalInputPicker:(JSCommand *)command {
+    [device.externalInputControl launchInputPickerWithSuccess:command.appLaunchSuccess
+                                                      failure:command.failure];
+}
+
 #pragma mark - WebAppLauncher
 
 - (void) webAppLauncher_launchWebApp:(JSCommand*)command

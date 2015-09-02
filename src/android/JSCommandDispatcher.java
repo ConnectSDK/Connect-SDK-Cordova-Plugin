@@ -42,6 +42,7 @@ import com.connectsdk.core.TextInputStatusInfo;
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.service.DeviceService;
 import com.connectsdk.service.WebOSTVService;
+import com.connectsdk.service.capability.ExternalInputControl;
 import com.connectsdk.service.capability.ExternalInputControl.ExternalInputListListener;
 import com.connectsdk.service.capability.KeyControl.KeyCode;
 import com.connectsdk.service.capability.MediaControl;
@@ -135,7 +136,7 @@ public class JSCommandDispatcher {
 
     @CommandMethod
     public void externalInputControl_getExternalInputList(final JSCommand command, JSONObject args) throws JSONException {
-        device.getExternalInputControl().getExternalInputList(new ExternalInputListListener () {
+        device.getExternalInputControl().getExternalInputList(new ExternalInputListListener() {
             @Override
             public void onSuccess(List<ExternalInputInfo> list) {
                 command.success(list);
@@ -158,6 +159,12 @@ public class JSCommandDispatcher {
         info.setId(inputId);
 
         device.getExternalInputControl().setExternalInput(info, command.getResponseListener());
+    }
+
+    @CommandMethod
+    public void externalInputControl_showExternalInputPicker(JSCommand command, JSONObject args) {
+        device.getCapability(ExternalInputControl.class)
+                .launchInputPicker(command.getAppLaunchListener());
     }
 
     /* FivewayControl methods */
