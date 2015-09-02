@@ -34,12 +34,14 @@ If you are only developing for one platform, feel free to ignore the steps & req
 Or for a specific version, such as 1.6.0
 
     cordova plugin add cordova-plugin-connectsdk@1.6.0
-
-Or, you can install a specific branch from Github, such as sdk_1.3
+    
+You can also install a specific branch from Github (e.g. to install versions older than 1.6.0), such as sdk_1.3
 
     cordova plugin add https://github.com/ConnectSDK/Connect-SDK-Cordova-Plugin.git#sdk_1.3
+    
+Thats it! Dependencies will be downloaded and set up automatically.
 
-Thats it! Dependencies will be downloaded and set up automatically. If you're installing an older version than 1.6.0 be sure to check the README from that branch and follow any manual set up steps.
+**Dependencies will not be downloaded automatically for versions older than 1.6.0. You'll need to check the README from that branch and follow any manual set up steps.**
 
 ## Contact
 * Twitter [@ConnectSDK](https://www.twitter.com/ConnectSDK)
