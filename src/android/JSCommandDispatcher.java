@@ -292,19 +292,19 @@ public class JSCommandDispatcher {
 
     @CommandMethod
     public void launcher_launchHulu(JSCommand command, JSONObject args) throws JSONException {
-        String contentId = args.getString("contentId");
+        String contentId = args.optString("contentId");
         device.getLauncher().launchHulu(contentId, command.getAppLaunchListener());
     }
 
     @CommandMethod
     public void launcher_launchNetflix(JSCommand command, JSONObject args) throws JSONException {
-        String contentId = args.getString("contentId");
+        String contentId = args.optString("contentId");
         device.getLauncher().launchNetflix(contentId, command.getAppLaunchListener());
     }
 
     @CommandMethod
     public void launcher_launchYouTube(JSCommand command, JSONObject args) throws JSONException {
-        String contentId = args.getString("contentId");
+        String contentId = args.optString("contentId");
         device.getLauncher().launchYouTube(contentId, command.getAppLaunchListener());
     }
 
