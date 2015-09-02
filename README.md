@@ -50,14 +50,18 @@ Thats it! Dependencies will be downloaded and set up automatically. If you're in
 
 ## Troubleshooting
 
-* If the plugin doesn't load on iOS, check if the *.m files are in the project's
-  "Compile Sources" list in "Build Phases".
-
 * To update the plugin, you'll need to remove and re-add the plugin
 
 ```
+    cordova plugin remove cordova-plugin-connectsdk
+    cordova plugin add cordova-plugin-connectsdk
+```
+
+* If you're using an older version of the ConnectSDK Cordova plugin than 1.6.0, we changed the plugin id for npm publishing. You'll need to remove the plugin using the old id, and add it with the new id.
+
+```
     cordova plugin remove com.connectsdk.cordovaplugin
-    cordova plugin add csdk-plugin-test
+    cordova plugin add cordova-plugin-connectsdk
 ```
 
 ## License
