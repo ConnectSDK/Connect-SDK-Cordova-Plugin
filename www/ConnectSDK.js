@@ -38,9 +38,9 @@ var SimpleEventEmitter = {
         if (!this._listeners) this._listeners = {};
         if (!this._listeners[event]) this._listeners[event] = [];
         this._listeners[event].push({callback: callback, context: context});
-        
+
         this.emit("_addListener", event);
-               
+
         return this;
     },
 
@@ -58,12 +58,12 @@ var SimpleEventEmitter = {
                 return (callback && callback !== l.callback) && (context && context !== l.context);
             });
         }
-        
+
         this.emit("_removeListener", event);
-               
+
         return this;
     },
-    
+
     hasListeners: function (event) {
         if (event) {
             return (this._listeners && this._listeners[event] && this._listeners[event].length > 0);
@@ -76,7 +76,7 @@ var SimpleEventEmitter = {
             return false;
         }
     },
-    
+
     emit: function (event) {
         var listeners = this._listeners && this._listeners[event];
         var args = Array.prototype.slice.call(arguments, 1);
@@ -152,7 +152,7 @@ var SuccessCallbacks = {
      * @param {function} callback - function to call when event is fired
      * @param {*} [context] - object to bind to "this" value when calling function
      * @returns {object} reference to the same object to allow chaining
-     */    
+     */
     error: function (callback, context) {
         return this.on("error", callback, context);
     },
@@ -184,7 +184,7 @@ var SuccessCallbacks = {
 // very simple class maker
 var createClass = function (desc) {
     var constructor;
-    
+
     if (desc.constructor) {
         constructor = desc.constructor;
         delete desc.constructor;
@@ -192,7 +192,7 @@ var createClass = function (desc) {
         constructor = function () {};
         throw new Error("no constructor");
     }
-    
+
     var prototype = constructor.prototype;
 
     if (desc.inherits) {
@@ -214,7 +214,7 @@ var createClass = function (desc) {
         });
         delete desc.mixins;
     }
-    
+
     if (desc.statics) {
         for (var staticProp in desc.statics) {
             if (desc.statics.hasOwnProperty(staticProp)) {
@@ -289,7 +289,7 @@ var DevicePicker = createClass(
 /** @lends DevicePicker.prototype */
 {
     mixins: [SimpleEventEmitter, SuccessCallbacks],
-    
+
     constructor: function () {
     },
 
@@ -309,6 +309,22 @@ var DevicePicker = createClass(
 var PairingLevel = {
     ON: "on",
     OFF: "off"
+};
+
+/**
+ * @constant
+ * @property {string} NONE - Only connect if no pairing is required
+ * @property {string} FIRST_SCREEN - Prompt the user on the TV to accept paring
+ * @property {string} PIN - Display a PIN on the TV, require user to enter it on the device
+ * @property {string} MIXED - Prompt the user on the TV to accept pairing. Also display a pin on the TV that the user can enter on the device.
+ * @property {string} AIRPLAY_MIRRORING - Require AirPlay mirroring to be enabled for connection (iOS only)
+ */
+var PairingType = {
+    NONE: "NONE",
+    FIRST_SCREEN: "FIRST_SCREEN",
+    PIN: "PIN",
+    MIXED: "MIXED",
+    AIRPLAY_MIRRORING: "AIRPLAY_MIRRORING"
 };
 
 /**
@@ -339,6 +355,21 @@ var Services = {
     WebOSTV: "webOS TV",
 };
 
+var KeyCodes = {
+    NUM_0: 0,
+    NUM_1: 1,
+    NUM_2: 2,
+    NUM_3: 3,
+    NUM_4: 4,
+    NUM_5: 5,
+    NUM_6: 6,
+    NUM_7: 7,
+    NUM_8: 8,
+    NUM_9: 9,
+    DASH: 10,
+    ENTER: 11
+};
+
 /**
  * @class DiscoveryManager
  * @classdesc ConnectSDK.discoveryManager is the main entry point into ConnectSDK.
@@ -361,7 +392,7 @@ var DiscoveryManager = createClass(
 /** @lends DiscoveryManager.prototype */
 {
     mixins: [SimpleEventEmitter],
-    
+
     constructor: function () {
         this._config = {};
         this._devices = {};
@@ -386,7 +417,7 @@ var DiscoveryManager = createClass(
             } else if (event === "stopdiscovery") {
                 this._started = false;
             }
-            
+
             if (event === "devicefound" || event === "devicelost" || event === "deviceupdated") {
                 var deviceId = update.device.deviceId;
                 var device = this._getDeviceByDesc(update.device);
@@ -395,7 +426,7 @@ var DiscoveryManager = createClass(
                     delete this._devices[deviceId];
                 } else {
                     this._devices[deviceId] = device;
-                    
+
                     if (event === "deviceupdated") {
                         device._handleDiscoveryUpdate(update.device);
                     }
@@ -413,14 +444,14 @@ var DiscoveryManager = createClass(
         //console.error("got discovery error " + error);
         this.emit("error", error);
     },
-    
+
     _setPairingLevel: function (pairingLevel, updateNow) {
         if (!pairingLevel || (Object.prototype.toString.call(pairingLevel) !== "[object String]")) {
             throw new TypeError("expected pairingLevel to be a string");
         }
-        
+
         this._config.pairingLevel = pairingLevel;
-        
+
         if (updateNow) {
             cordova.exec(null, null, PLUGIN_ID, "setDiscoveryConfig",
                          [{pairingLevel: this._config.pairingLevel}]);
@@ -438,11 +469,11 @@ var DiscoveryManager = createClass(
 
     _setCapabilityFilters: function (filters, updateNow) {
         filters = filters || [];
-        
+
         if (Object.prototype.toString.call(filters) !== "[object Array]") {
             throw new TypeError("capabilityFilters should be an array");
         }
-        
+
         filters = filters.map(function (filter) {
             if (filter instanceof CapabilityFilter) {
                 return filter.getCapabilities();
@@ -452,9 +483,9 @@ var DiscoveryManager = createClass(
                 throw new TypeError("filter objects must be CapabilityFilter instances or arrays of strings");
             }
         });
-        
+
         this._config.capabilityFilters = filters;
-        
+
         if (updateNow && this._started) {
             cordova.exec(null, null, PLUGIN_ID, "setDiscoveryConfig",
                          [{capabilityFilters: this._config.capabilityFilters}]);
@@ -478,7 +509,7 @@ var DiscoveryManager = createClass(
             if (config.airPlayServiceMode) {
                 this._setAirPlayServiceMode(config.airPlayServiceMode, false);
             }
-            
+
             if (config.capabilityFilters) {
                 this._setCapabilityFilters(config.capabilityFilters, false);
             }
@@ -540,17 +571,19 @@ var DiscoveryManager = createClass(
      * Show device picker popup. To get notified when the user has selected a device, add a success/error
      * listener to the DevicePicker returned when calling this method.
      *
-     * @param {Object} [options] - Dictionary object to configure picker. Currently no options are supported.
+     * @param {Object} [options] - All keys are optional
+     *
+     *     - pairingType (string): PairingType to use
      * @returns {DevicePicker}
      */
     pickDevice: function (options, successCallback, errorCallback) {
         var self = this;
         var picker = new DevicePicker();
-                                   
+
         if (successCallback) {
             picker.on("success", successCallback);
         }
-                                   
+
         if (errorCallback) {
             picker.on("error", errorCallback);
         }
@@ -568,7 +601,7 @@ var DiscoveryManager = createClass(
         };
 
         cordova.exec(success, failure, PLUGIN_ID, "pickDevice", [options]);
-                                   
+
         return picker;
     },
 
@@ -635,16 +668,16 @@ var ConnectableDevice = createClass(
 /** @lends ConnectableDevice.prototype */
 {
     mixins: [SimpleEventEmitter],
-    
+
     statics: {
         _interfaceClasses: {},
         _serviceWrappers: {},
 
         _registerInterface: function (name, ifaceClass) {
             var getterName = "get" + name[0].toUpperCase() + name.substr(1);
-            
+
             this._interfaceClasses[name] = ifaceClass;
-            
+
             this.prototype[getterName] = function () {
                 return this._interfaces[name];
             };
@@ -670,15 +703,15 @@ var ConnectableDevice = createClass(
             var IfaceClass = ConnectableDevice._interfaceClasses[name];
             this._interfaces[name] = new IfaceClass(this);
         }
-        
+
         this._capabilities = {};
         this._subscribedToEvents = false;
-        
+
         this.on("_addListener", this._handleAddListener, this);
         this._cacheServices();
         this._cacheCapabilities();
     },
-    
+
     _handleAddListener: function () {
         if (this.hasListeners() && !this._subscribedToEvents) {
             // Subscribe to events on the native device object
@@ -703,22 +736,22 @@ var ConnectableDevice = createClass(
             }
         }
     },
-    
+
     _cacheCapabilities: function () {
         var caps = this._desc.capabilities;
         delete this._desc.capabilities;
-        
+
         if (caps) {
             var capsHash = {};
-            
+
             for (var i = 0; i < caps.length; i += 1) {
                 capsHash[caps[i]] = true;
             }
-            
+
             this._capabilities = capsHash;
         }
     },
-    
+
     _handleDiscoveryUpdate: function (desc) {
         this._desc = desc;
         this._cacheServices();
@@ -732,22 +765,22 @@ var ConnectableDevice = createClass(
     _handleUpdate: function (args) {
         var event = args[0];
         var update = args[1];
-        
+
          if (event === "capabilitieschanged") {
             var i, cap;
             var added = update.added || [];
             var removed = update.removed || [];
-            
+
             for (i = 0; i < added.length; i += 1) {
                 cap = added[i];
                 this._capabilities[cap] = true;
             }
-            
+
             for (i = 0; i < removed.length; i += 1) {
                 cap = removed[i];
                 delete this._capabilities[cap];
             }
-             
+
             args = [event]; // don't pass changes
         } else if (event === "disconnect") {
             this._capabilities = {};
@@ -779,12 +812,21 @@ var ConnectableDevice = createClass(
     },
 
     /**
+     * Set a desirable pairing type to the device.
+     * @param pairingType (string): PairingType to use
+     */
+    setPairingType: function (pairingType) {
+        cordova.exec(this._handleUpdate.bind(this), this._handleError.bind(this), PLUGIN_ID, "setPairingType", [this._deviceId, pairingType]);
+    },
+
+
+    /**
      * Returns true if device is ready to use.
      */
     isReady: function () {
         return this._ready;
     },
-    
+
     /**
      * Get the human-readable name of the device.
      * @returns {string}
@@ -800,7 +842,7 @@ var ConnectableDevice = createClass(
     getIPAddress: function () {
         return this._desc.ipAddress || this._desc.lastKnownIPAddress;
     },
-    
+
     /**
      * Get the device model name.
      * @returns {string}
@@ -808,7 +850,7 @@ var ConnectableDevice = createClass(
     getModelName: function () {
         return this._desc.modelName;
     },
-    
+
     /**
      * Get the device model number.
      * @returns {string}
@@ -824,7 +866,7 @@ var ConnectableDevice = createClass(
     getCapabilities: function () {
         return Object.keys(this._capabilities);
     },
-    
+
     /**
      * @param {string} name of capability
      * @returns {boolean} true if device supports the given capability
@@ -832,7 +874,7 @@ var ConnectableDevice = createClass(
     hasCapability: function (cap) {
         return this._capabilities[cap] ? true : false;
     },
-    
+
     /**
      * Flexible version of hasCapability which returns true
      * if all of the capabilities specified are supported.
@@ -854,18 +896,18 @@ var ConnectableDevice = createClass(
         } else if (arguments.length > 0) {
             caps = arguments;
         }
-        
+
         for (var i = 0; i < caps.length; i += 1) {
             var cap = caps[i];
-            
+
             if (!this._capabilities[cap]) {
                 return false;
             }
         }
-        
+
         return true;
     },
-    
+
     /**
      * Like supports() but returns true if any specified capability
      * is supported.
@@ -883,13 +925,13 @@ var ConnectableDevice = createClass(
         } else if (arguments.length > 0) {
             caps = arguments;
         }
-        
+
         for (var i = 0; i < caps.length; i += 1) {
             if (this._capabilities[caps[i]]) {
                 return true;
             }
         }
-        
+
         return false;
     },
 
@@ -934,7 +976,7 @@ var ConnectableDevice = createClass(
     getId: function () {
         return this._deviceId;
     },
-    
+
     _createCommandId: function () {
         return this._deviceId + "_" + this._nextCommandId++;
     },
@@ -982,7 +1024,7 @@ var Command = createClass(
     mixins: [SimpleEventEmitter, SuccessCallbacks],
 
     _subscribe: false,
-    
+
     constructor: function (device, commandId, options) {
         this._device = device;
         this._commandId = commandId;
@@ -994,22 +1036,22 @@ var Command = createClass(
 
         var success = function (update) {
             var event = update[0];
-        
+
             if (event === "success") {
                 var data = update.slice(1);
-                
+
                 if (self._responseWrapper) {
                     // call responseWrapper with [device, arg1, ...]
                     data = self._responseWrapper.apply(null, [self._device].concat(data));
                 }
-                
+
                 self.emit.apply(self, ["success"].concat(data));
                 self.emit.apply(self, ["complete", undefined].concat(data));
             } else {
                 self.emit.apply(self, update);
             }
         };
-        
+
         var failure = function (error) {
             self.emit("error", error);
             self.emit("complete", error);
@@ -1027,7 +1069,7 @@ var Command = createClass(
  * @classdesc
  * Subscription objects are returned when calling capability subscription
  * methods.
- * 
+ *
  * Subscription objects allow listening for success/error events from the
  * request. Success events may be emitted multiple times when updates to the
  * subscription are received.
@@ -1059,7 +1101,7 @@ var Subscription = createClass(
     inherits: Command,
 
     _subscribe: true,
-    
+
     constructor: function () {
         Command.apply(this, arguments);
     },
@@ -1067,7 +1109,7 @@ var Subscription = createClass(
     /**
      * Unsubscribes from this subscription. Notifies the device that updates are no longer needed,
      * and stops emitting events from this Subscription object.
-     */    
+     */
     unsubscribe: function () {
         cordova.exec(null, null, PLUGIN_ID, "cancelCommand", [this._device._deviceId, this._commandId]);
     }
@@ -1152,16 +1194,16 @@ var LaunchSession = createClass(
         this._data = data;
         this._objectId = data.objectId;
     },
-    
+
     getAppId: function () {
         return this._data.appId;
     },
-    
+
     /** Close the app/media associated with this launch session. */
     close: function () {
         return this._device._sendCommand("CORDOVAPLUGIN", "closeLaunchSession", {"launchSession": this._data}, false);
     },
-    
+
     toJSON: function () {
         return this._data;
     }
@@ -1212,7 +1254,7 @@ var MediaControlWrapper = createClass(
     },
 
     getDuration: function () {
-        return this._sendCommand("getPosition");
+        return this._sendCommand("getDuration");
     },
 
     getPosition: function () {
@@ -1325,7 +1367,7 @@ var WebAppSession = createClass(
         return this._device._sendCommand("webAppSession", "disconnect", {objectId: this._objectId});
     },
 
-    /** 
+    /**
      * Set web app session listener to app
      * @returns {Command}
      */
@@ -1364,7 +1406,7 @@ var WebAppSession = createClass(
     close: function () {
         return this._device._sendCommand("CORDOVAPLUGIN", "closeLaunchSession", {"launchSession": this._data.launchSession}, false);
     },
-    
+
     toJSON: function () {
         return this._data;
     }
@@ -1383,28 +1425,28 @@ function wrapMediaLaunchSession(device, launchSessionData, mediaControlData, pla
 function wrapWebAppSession(device, sessionData) {
     return [new WebAppSession(device, sessionData)];
 }
-    
+
 function createDeviceMethod(ifaceName, name, method) {
     var f = function () {
         var params = {};
         var args = method.args || [];
-        
+
         for (var i = 0; i < args.length; i++) {
             var arg = args[i];
             var optional = false;
-            
+
             if (arg[arg.length - 1] === '?') {
                 arg = arg.substr(0, arg.length - 1);
                 optional = true;
             }
-            
+
             if (!optional && (i > arguments.length)) {
                 if (console) { console.warn("missing parameter to " + name + ": " + arg); }
             }
-            
+
             params[arg] = arguments[i];
         }
-        
+
         return this._device._sendCommand(ifaceName, name, params, method.subscribe, method.responseWrapper);
     };
     return f;
@@ -1416,22 +1458,22 @@ function registerDeviceInterface (ifaceName, methods) {
             this._device = device;
         }
     };
-    
+
     for (var name in methods) {
         var method = methods[name];
-        
+
         if (typeof method === 'function') {
             desc[name] = method;
         } else if (typeof method === 'object') {
             desc[name] = createDeviceMethod(ifaceName, name, method);
         }
     }
-    
+
     var ifaceClass = createClass(desc);
-    
+
     if (!exports.interfaces) { exports.interfaces = {}; }
     exports.interfaces[ifaceName] = ifaceClass;
-    
+
     // Add getter method to ConnectableDevice
     ConnectableDevice._registerInterface(ifaceName, ifaceClass);
 }
@@ -1636,6 +1678,13 @@ registerDeviceInterface("externalInputControl",
      */
     setExternalInput: {
         args: ["externalInputInfo"]
+    },
+
+    /**
+     * @method
+     */
+    showExternalInputPicker: {
+        responseWrapper: wrapLaunchSession
     }
 });
 
@@ -2143,8 +2192,10 @@ exports.DevicePicker = DevicePicker;
 exports.ConnectableDevice = ConnectableDevice;
 exports.CapabilityFilter = CapabilityFilter;
 exports.PairingLevel = PairingLevel;
+exports.PairingType = PairingType;
 exports.AirPlayServiceMode = AirPlayServiceMode;
 exports.Services = Services;
+exports.KeyCodes = KeyCodes;
 
 // Singleton instance
 exports.discoveryManager = new DiscoveryManager();

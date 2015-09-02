@@ -169,4 +169,8 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
             DeviceService service, PairingType pairingType) {
         sendEvent("servicepairingrequired");
     }
+
+    public void setPairingType(PairingType pairingType) {
+        device.setPairingType(pairingType);
+    }
 }

@@ -276,7 +276,7 @@ static id orNull (id obj)
             NSDictionary* obj = @{
                 @"id": orNull(info.id),
                 @"name": orNull(info.name),
-                @"iconURL": orNull(info.iconURL)
+                @"iconURL": orNull(info.iconURL.absoluteString)
             };
             
             [objs addObject:obj];
@@ -617,7 +617,7 @@ static id orNull (id obj)
 
 - (void) volumeControl_setMute:(JSCommand*)command
 {
-    BOOL mute = [(NSNumber*)command.args[@"volume"] boolValue];
+    BOOL mute = [(NSNumber*)command.args[@"mute"] boolValue];
     [device.volumeControl setMute:mute success:command.success failure:command.failure];
 }
 
@@ -755,6 +755,11 @@ static id orNull (id obj)
     externalInputInfo.name = infoObj[@"name"];
     
     [device.externalInputControl setExternalInput:externalInputInfo success:command.success failure:command.failure];
+}
+
+- (void)externalInputControl_showExternalInputPicker:(JSCommand *)command {
+    [device.externalInputControl launchInputPickerWithSuccess:command.appLaunchSuccess
+                                                      failure:command.failure];
 }
 
 #pragma mark - WebAppLauncher
