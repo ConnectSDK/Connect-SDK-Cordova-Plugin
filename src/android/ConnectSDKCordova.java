@@ -304,7 +304,7 @@ public class ConnectSDKCordova extends CordovaPlugin {
             return DeviceService.PairingType.MIXED;
         }
         return DeviceService.PairingType.NONE;
-    }    
+    }
 
     @Override
     public void onDestroy() {
