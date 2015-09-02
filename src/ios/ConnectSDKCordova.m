@@ -19,9 +19,11 @@
 
 #import "ConnectSDKCordova.h"
 #import "ConnectSDKCordovaDispatcher.h"
-#import "ConnectSDK/CapabilityFilter.h"
 #import "ConnectSDKCordovaObjects.h"
+
 #import "ConnectSDK/AirPlayService.h"
+#import "ConnectSDK/CapabilityFilter.h"
+#import "ConnectSDK/DeviceServiceDelegate.h"
 
 #pragma mark - Helper types
 
@@ -47,6 +49,14 @@
     
     return state;
 }
+
+@end
+
+@interface ConnectSDKCordova ()
+
+/// A @c DeviceServicePairingType value that is passed when displaying a device
+/// picker and then automagically set to a selected device.
+@property (nonatomic, strong, nullable) NSNumber /*<DeviceServicePairingType>*/ *automaticPairingTypeNumber;
 
 @end
 
@@ -169,6 +179,11 @@
         } else if (format && [format isEqualToString:@"popup"]) {
             popup = YES;
         }
+
+        NSString *pairingTypeString = options[@"pairingType"];
+        self.automaticPairingTypeNumber = pairingTypeString ?
+                [self parsePairingType:pairingTypeString] :
+                nil;
     }
     
     DevicePicker *picker = [_discoveryManager devicePicker];
@@ -284,6 +299,19 @@
 
     if (device) {
         [device disconnect];
+    }
+}
+
+- (void) setPairingType:(CDVInvokedUrlCommand*)command
+{
+    NSString* deviceId = (NSString *)[command argumentAtIndex:0];
+    ConnectableDevice* device = [self getDeviceById:deviceId];
+
+    NSString *pairingTypeString = [command argumentAtIndex:1];
+    NSNumber *pairingTypeNumber = [self parsePairingType:pairingTypeString];
+
+    if (device && pairingTypeNumber) {
+        [self setPairingTypeNumber:pairingTypeNumber toDevice:device];
     }
 }
 
@@ -422,6 +450,32 @@ static id orNull (id obj)
     };
 }
 
+- (NSNumber *)parsePairingType:(NSString *)typeString {
+    // the PairingType values from `ConnectSDK.js`
+    static NSDictionary *mapping;
+    static dispatch_once_t mappingOnce;
+    dispatch_once(&mappingOnce, ^{
+        mapping = @{
+                @"NONE": @(DeviceServicePairingTypeNone),
+                @"FIRST_SCREEN": @(DeviceServicePairingTypeFirstScreen),
+                @"PIN": @(DeviceServicePairingTypePinCode),
+                @"MIXED": @(DeviceServicePairingTypeMixed),
+                @"AIRPLAY_MIRRORING": @(DeviceServicePairingTypeAirPlayMirroring),
+        };
+    });
+
+    NSNumber *typeNumber = mapping[typeString];
+    NSAssert(typeNumber, @"Unknown pairing type string: %@", typeString);
+    return typeNumber;
+}
+
+- (void)setPairingTypeNumber:(NSNumber *)pairingTypeNumber
+                    toDevice:(ConnectableDevice *)device {
+    DeviceServicePairingType type = (DeviceServicePairingType)
+            [pairingTypeNumber unsignedIntegerValue];
+    [device setPairingType:type];
+}
+
 #pragma mark - DiscoveryManager delegates
 
 - (void) discoveryManager:(DiscoveryManager *)manager didFindDevice:(ConnectableDevice *)device
@@ -465,6 +519,11 @@ static id orNull (id obj)
 - (void) devicePicker:(DevicePicker *)picker didSelectDevice:(ConnectableDevice *)device;
 {
     if (_showPickerCallbackId) {
+        if (self.automaticPairingTypeNumber) {
+            [self setPairingTypeNumber:self.automaticPairingTypeNumber
+                              toDevice:device];
+        }
+
         NSDictionary* dict = [self deviceAsDict:device];
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dict] callbackId:_showPickerCallbackId];
         
