@@ -12,15 +12,13 @@ For more information, visit our [website](http://www.connectsdk.com/).
 
 These steps assume you have a basic working knowledge of development for Android, iOS and Cordova/PhoneGap. For these steps to work, you will need the following:
 
-- Cordova/PhoneGap 2.x or 3.x
-- Xcode
-- Xcode command line tools
-- Android Developer Tools (Eclipse)
-- Android's tools & platform-tools folders in your PATH
+- Cordova/PhoneGap (5.0+)
+- Xcode & Command Line Tools
+- Android SDK
 
 If you are only developing for one platform, feel free to ignore the steps & requirements for the irrelevant platform.
 
-## Installation for Cordova/PhoneGap 3.x
+## Installation for Cordova/PhoneGap 5.x
 
 #### 1. Create a new Cordova app (optional)
 
@@ -31,61 +29,17 @@ If you are only developing for one platform, feel free to ignore the steps & req
 
 #### 2. Add plugin to app
 
-    cordova plugins add https://github.com/ConnectSDK/Connect-SDK-Cordova-Plugin.git#master
+    cordova plugin add cordova-plugin-connectsdk
 
-Or for a specific branch, such as sdk_1.3:
+Or for a specific version, such as 1.6.0
 
-    cordova plugins add https://github.com/ConnectSDK/Connect-SDK-Cordova-Plugin.git#sdk_1.3
+    cordova plugin add cordova-plugin-connectsdk@1.6.0
 
-#### 3. Setup projects
+Or, you can install a specific branch from Github, such as sdk_1.3
 
-Run the following command to create Xcode and Eclipse projects:
+    cordova plugin add https://github.com/ConnectSDK/Connect-SDK-Cordova-Plugin.git#sdk_1.3
 
-    cordova prepare
-
-The projects will be located in platforms/ios and platforms/android respectively.
-
-Next, follow the README.md from the Connect SDK iOS and Android source repositories:
-
-* https://github.com/ConnectSDK/Connect-SDK-iOS
-* https://github.com/ConnectSDK/Connect-SDK-Android
-
-## Installation for Cordova/PhoneGap 2.x
-
-#### 1. Create a new app (optional)
-    # iOS
-    /path/to/cordova-ios/bin/create /path/to/my_new_cordova_project com.example.cordova_project_name
-    
-    # Android
-    /path/to/cordova-android/bin/create /path/to/my_new_cordova_project com.example.cordova_project_name
-
-#### 2. Add plugin files to your project
-1. Download the files located at <https://github.com/ConnectSDK/Connect-SDK-Cordova-Plugin>
-2. Copy www/ConnectSDK.js to your project's www/js folder
-3. Copy the contents of the src folder to your project. For Android, the files should go in src/com/connectsdk/cordova
-
-#### 3. Modify Cordova/PhoneGap config files
-    # add to www/index.html
-    <script src="js/ConnectSDK.js" type="text/javascript"></script>
-	
-    # add plugin to www/config.xml
-
-    ## iOS
-    <plugins>
-        <plugin name="ConnectSDK" value="ConnectSDKCordova" />
-    </plugins>
-
-    ## Android
-    <plugins>
-        <plugin name="ConnectSDK" value="com.connectsdk.cordova.ConnectSDKCordova" />
-    </plugins>
-
-#### 4. Setup projects
-
-Next, follow the README.md from the Connect SDK iOS and Android source repositories:
-
-* https://github.com/ConnectSDK/Connect-SDK-iOS
-* https://github.com/ConnectSDK/Connect-SDK-Android
+Thats it! Dependencies will be downloaded and set up automatically. If you're installing an older version than 1.6.0 be sure to check the README from that branch and follow any manual set up steps.
 
 ## Contact
 * Twitter [@ConnectSDK](https://www.twitter.com/ConnectSDK)
@@ -99,12 +53,16 @@ Next, follow the README.md from the Connect SDK iOS and Android source repositor
 * If the plugin doesn't load on iOS, check if the *.m files are in the project's
   "Compile Sources" list in "Build Phases".
 
-* When updating or re-adding the plugin, you may need to manually add the *.m files
-  as well as libicu.dylib, libz.dylib, and any other missing libraries.
+* To update the plugin, you'll need to remove and re-add the plugin
+
+```
+    cordova plugin remove com.connectsdk.cordovaplugin
+    cordova plugin add csdk-plugin-test
+```
 
 ## License
 
-Copyright (c) 2013-2014 LG Electronics.
+Copyright (c) 2013-2015 LG Electronics.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

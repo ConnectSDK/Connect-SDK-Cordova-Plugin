@@ -1,0 +1,76 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.2.3'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion '22.0.1'
+
+    packagingOptions {
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = [
+                    'src',
+                    'core/src',
+                    'modules/google_cast/src',
+                    'modules/firetv/src',
+            ]
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+    }
+    buildTypes {
+        debug {
+        }
+        release {
+            minifyEnabled false
+        }
+    }
+    android {
+        lintOptions {
+            abortOnError false
+        }
+    }
+}
+
+dependencies {
+    compile files('core/libs/java-websocket-patch.jar')
+    compile files('core/libs/javax.jmdns_3.4.1-patch2.jar')
+
+    compile fileTree(dir: 'modules/firetv/libs', include: '*.jar')
+
+    compile 'com.android.support:support-v4:22.2.1'
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:mediarouter-v7:22.2.1'
+    compile 'com.google.android.gms:play-services-cast:7.8.0'
+}
+
+apply from: 'maven-push.gradle'
