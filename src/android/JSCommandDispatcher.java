@@ -44,11 +44,13 @@ import com.connectsdk.service.DeviceService;
 import com.connectsdk.service.WebOSTVService;
 import com.connectsdk.service.capability.ExternalInputControl;
 import com.connectsdk.service.capability.ExternalInputControl.ExternalInputListListener;
+import com.connectsdk.service.capability.Launcher;
 import com.connectsdk.service.capability.KeyControl.KeyCode;
 import com.connectsdk.service.capability.MediaControl;
 import com.connectsdk.service.capability.MediaControl.DurationListener;
 import com.connectsdk.service.capability.MediaControl.PositionListener;
 import com.connectsdk.service.capability.MediaPlayer;
+import com.connectsdk.service.capability.PlaylistControl;
 import com.connectsdk.service.capability.TextInputControl;
 import com.connectsdk.service.capability.WebAppLauncher;
 import com.connectsdk.service.command.ServiceCommandError;
@@ -362,7 +364,7 @@ public class JSCommandDispatcher {
     public void mediaControl_getDuration(final JSCommand command, JSONObject args) throws JSONException {
         MediaControl mediaControl = getMediaControl(command, args);
 
-        mediaControl.getDuration(new DurationListener () {
+        mediaControl.getDuration(new DurationListener() {
             @Override
             public void onSuccess(Long durationMillis) {
                 command.success((double) durationMillis / 1000.0);
@@ -379,7 +381,7 @@ public class JSCommandDispatcher {
     public void mediaControl_getPosition(final JSCommand command, JSONObject args) throws JSONException {
         MediaControl mediaControl = getMediaControl(command, args);
 
-        mediaControl.getPosition(new PositionListener () {
+        mediaControl.getPosition(new PositionListener() {
             @Override
             public void onSuccess(Long positionMillis) {
                 command.success((double) positionMillis / 1000.0);
@@ -397,6 +399,42 @@ public class JSCommandDispatcher {
         MediaControl mediaControl = getMediaControl(command, args);
 
         mediaControl.subscribePlayState(command.getPlayStateListener());
+    }
+
+    /* PlaylistControl methods */
+
+    @CommandMethod
+    public void playlistControl_next(JSCommand command, JSONObject args) throws JSONException {
+        PlaylistControl playlistControl = getPlaylistControl(command, args);
+
+        if (playlistControl != null) {
+            playlistControl.next(command.getResponseListener());
+        } else {
+            firePlaylistControlNotAvailableError(command);
+        }
+    }
+
+    @CommandMethod
+    public void playlistControl_previous(JSCommand command, JSONObject args) throws JSONException {
+        PlaylistControl playlistControl = getPlaylistControl(command, args);
+
+        if (playlistControl != null) {
+            playlistControl.previous(command.getResponseListener());
+        } else {
+            firePlaylistControlNotAvailableError(command);
+        }
+    }
+
+    @CommandMethod
+    public void playlistControl_jumpToTrack(JSCommand command, JSONObject args) throws JSONException {
+        PlaylistControl playlistControl = getPlaylistControl(command, args);
+
+        if (playlistControl != null) {
+            long position = args.getLong("index");
+            playlistControl.jumpToTrack(position, command.getResponseListener());
+        } else {
+            firePlaylistControlNotAvailableError(command);
+        }
     }
 
     /* MediaPlayer methods */
@@ -814,7 +852,8 @@ public class JSCommandDispatcher {
                 command.error("toast options must include url or appId when showing a clickable toast");
             }
         } else {
-            device.getToastControl().showToast(message, iconData, iconExtension, command.getResponseListener());
+            device.getToastControl().showToast(message, iconData, iconExtension, command
+                    .getResponseListener());
         }
     }
 
@@ -831,9 +870,8 @@ public class JSCommandDispatcher {
     }
 
     MediaControl getMediaControl(JSCommand command, JSONObject args) throws JSONException {
-        String objectId = args.optString("objectId");
-
-        if (objectId != null) {
+        if (args.has("objectId")) {
+            String objectId = args.optString("objectId");
             MediaControlWrapper wrapper = (MediaControlWrapper) plugin.getObjectWrapper(objectId);
 
             if (wrapper != null) {
@@ -844,5 +882,24 @@ public class JSCommandDispatcher {
         } else {
             return device.getMediaControl();
         }
+    }
+
+    PlaylistControl getPlaylistControl(JSCommand command, JSONObject args) throws JSONException {
+        if (args.has("objectId")) {
+            String objectId = args.optString("objectId");
+            PlaylistControlWrapper wrapper = (PlaylistControlWrapper) plugin.getObjectWrapper(objectId);
+
+            if (wrapper != null) {
+                return wrapper.playlistControl;
+            } else {
+                throw new DispatcherException("PlaylistControlWrapper session no longer exists");
+            }
+        } else {
+            return device.getCapability(PlaylistControl.class);
+        }
+    }
+
+    private void firePlaylistControlNotAvailableError(JSCommand command) {
+        command.getResponseListener().onError(new ServiceCommandError("PlaylistControl is not available"));
     }
 }

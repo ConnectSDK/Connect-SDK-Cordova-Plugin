@@ -70,6 +70,7 @@
         <source-file src="src/android/JSObjectWrapper.java" target-dir="src/com/connectsdk/cordova" />
         <source-file src="src/android/WebAppSessionWrapper.java" target-dir="src/com/connectsdk/cordova" />
         <source-file src="src/android/MediaControlWrapper.java" target-dir="src/com/connectsdk/cordova" />
+	<source-file src="src/android/PlaylistControlWrapper.java" target-dir="src/com/connectsdk/cordova" />
 
         <info>
     Next, you will need to add the Connect SDK Android project and dependencies to your project.

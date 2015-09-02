@@ -49,3 +49,12 @@
 
 - (instancetype) initWithPlugin:(ConnectSDKCordova*)plugin mediaControl:(id<MediaControl>)mediaControl;
 @end
+
+@interface PlaylistControlWrapper : JSObjectWrapper
+
+@property (nonatomic, strong) id<PlayListControl> playlistControl;
+
+- (instancetype)initWithPlugin:(ConnectSDKCordova*)plugin
+               playlistControl:(id<PlayListControl>)playlistControl;
+
+@end
