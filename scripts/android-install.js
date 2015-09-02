@@ -73,6 +73,7 @@ AndroidInstall.prototype.executeStep = function (step) {
 			self.executeStep(step + 1);
 		}, function (err) {
 			console.log("Encountered an error, reverting install steps");
+			console.error(err);
 			self.revertStep(step);
 		});
 	} else {
