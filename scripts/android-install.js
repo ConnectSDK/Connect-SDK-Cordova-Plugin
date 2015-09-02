@@ -105,34 +105,34 @@ AndroidInstall.prototype.revert_createTemporaryDirectory = function () {
 
 AndroidInstall.prototype.cloneConnectSDK = function () {
 	console.log("Cloning Connect-SDK-Android repository");
-	return Q.nfcall(fs.readdir, safePath('./com.connectsdk.cordovaplugin'))
+	return Q.nfcall(fs.readdir, safePath('./cordova-plugin-connectsdk'))
 	.then(function (files) {
 		for (var i = 0; i < files.length; i++) {
 			if (files[i].indexOf('Connect-SDK-Android') !== -1) {
 				csdkDirectory = files[i];
-				return Q.nfcall(exec, commands.mv + " " + safePath("./com.connectsdk.cordovaplugin/" + csdkDirectory) + " " + safePath("./csdk_tmp/" + csdkDirectory));
+				return Q.nfcall(exec, commands.mv + " " + safePath("./cordova-plugin-connectsdk/" + csdkDirectory) + " " + safePath("./csdk_tmp/" + csdkDirectory));
 			}
 		}
 	})
 	.then(function () {
-		return Q.nfcall(exec, "git clone --recursive --depth 1 " + paths.ConnectSDK_Repository + " " + safePath("./com.connectsdk.cordovaplugin/" + csdkDirectory));
+		return Q.nfcall(exec, "git clone --recursive --depth 1 " + paths.ConnectSDK_Repository + " " + safePath("./cordova-plugin-connectsdk/" + csdkDirectory));
 	})
 	.then(function () {
-		return Q.nfcall(exec, "git checkout " + paths.ConnectSDK_Tag, {cwd: safePath("./com.connectsdk.cordovaplugin/" + csdkDirectory)});
+		return Q.nfcall(exec, "git checkout " + paths.ConnectSDK_Tag, {cwd: safePath("./cordova-plugin-connectsdk/" + csdkDirectory)});
 	})
 	.then(function () {
-		return Q.nfcall(exec, commands.cp + " " + safePath("../../plugins/com.connectsdk.cordovaplugin/Connect-SDK-Android/build.gradle") + " " + safePath("./com.connectsdk.cordovaplugin/" + csdkDirectory + "/build-extras.gradle"));
+		return Q.nfcall(exec, commands.cp + " " + safePath("../../plugins/cordova-plugin-connectsdk/Connect-SDK-Android/build.gradle") + " " + safePath("./cordova-plugin-connectsdk/" + csdkDirectory + "/build-extras.gradle"));
 	})
 	.then(function () {
-		return Q.nfcall(exec, commands.cp + " " + safePath("./csdk_tmp/" + csdkDirectory + "/build.gradle") + " " + safePath("./com.connectsdk.cordovaplugin/" + csdkDirectory + "/build.gradle"));
+		return Q.nfcall(exec, commands.cp + " " + safePath("./csdk_tmp/" + csdkDirectory + "/build.gradle") + " " + safePath("./cordova-plugin-connectsdk/" + csdkDirectory + "/build.gradle"));
 	});
 };
 
 AndroidInstall.prototype.revert_cloneConnectSDK = function () {
 	console.log("Reverting Connect-SDK-Android repository clone");
-	return Q.nfcall(exec, commands.rmRF + " " + safePath('./com.connectsdk.cordovaplugin/' + csdkDirectory))
+	return Q.nfcall(exec, commands.rmRF + " " + safePath('./cordova-plugin-connectsdk/' + csdkDirectory))
 	.then (function () {
-		return Q.nfcall(exec, commands.mv + " " + safePath("./csdk_tmp/" + csdkDirectory) + " " + safePath("./com.connectsdk.cordovaplugin/" + csdkDirectory));
+		return Q.nfcall(exec, commands.mv + " " + safePath("./csdk_tmp/" + csdkDirectory) + " " + safePath("./cordova-plugin-connectsdk/" + csdkDirectory));
 	})
 };
 
@@ -150,10 +150,10 @@ AndroidInstall.prototype.downloadFlingSDK = function () {
 			uz.on('close', function () {
 				if (deferred.promise.inspect().state !== "rejected") {
 					console.log("Moving AmazonFling.jar");
-					Q.nfcall(exec, commands.mv + " " + safePath(paths.AmazonFling_Jar) + " " + safePath("./com.connectsdk.cordovaplugin/" + csdkDirectory + "/modules/firetv/libs/AmazonFling.jar"))
+					Q.nfcall(exec, commands.mv + " " + safePath(paths.AmazonFling_Jar) + " " + safePath("./cordova-plugin-connectsdk/" + csdkDirectory + "/modules/firetv/libs/AmazonFling.jar"))
 					.then(function () {
 						console.log("Moving WhisperPlay.jar");
-						return Q.nfcall(exec, commands.mv + " " + safePath(paths.WhisperPlay_Jar) + " " + safePath("./com.connectsdk.cordovaplugin/" + csdkDirectory + "/modules/firetv/libs/WhisperPlay.jar"));
+						return Q.nfcall(exec, commands.mv + " " + safePath(paths.WhisperPlay_Jar) + " " + safePath("./cordova-plugin-connectsdk/" + csdkDirectory + "/modules/firetv/libs/WhisperPlay.jar"));
 					})
 					.then(function () {
 						deferred.resolve();

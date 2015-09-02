@@ -111,7 +111,7 @@ iOSInstall.prototype.createTemporaryDirectory = function () {
 		.then(function (files) {
 			for (var i = 0; i < files.length; i++) {
 				if (files[i].indexOf('.xcodeproj') !== -1) {
-					csdkDirectory = "./" + files[i].substring(0, files[i].indexOf('.xcodeproj')) + "/Plugins/com.connectsdk.cordovaplugin";
+					csdkDirectory = "./" + files[i].substring(0, files[i].indexOf('.xcodeproj')) + "/Plugins/cordova-plugin-connectsdk";
 					return Q.nfcall(fs.mkdir, safePath('./csdk_tmp'));
 				}
 			}
