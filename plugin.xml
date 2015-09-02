@@ -19,7 +19,12 @@
     </js-module>
 
     <platform name="ios">
-        
+
+        <js-module src="www/ios-capabilities.js" name="Capabilities.js">
+            <merges target="navigator.__CSDKCapabilities" />
+            <merges target="__CSDKCapabilities" />
+        </js-module>
+
         <config-file target="config.xml" parent="/*">
             <feature name="ConnectSDK">
                 <param name="ios-package" value="ConnectSDKCordova"/>
@@ -44,6 +49,12 @@
     </platform>
 
     <platform name="android">
+
+        <js-module src="www/android-capabilities.js" name="Capabilities.js">
+            <merges target="navigator.__CSDKCapabilities" />
+            <merges target="__CSDKCapabilities" />
+        </js-module>
+
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="ConnectSDK">
                 <param name="android-package" value="com.connectsdk.cordova.ConnectSDKCordova"/>

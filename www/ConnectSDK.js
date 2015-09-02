@@ -872,7 +872,7 @@ var ConnectableDevice = createClass(
      * @returns {boolean} true if device supports the given capability
      */
     hasCapability: function (cap) {
-        return this._capabilities[cap] ? true : false;
+        return !!this._capabilities[cap.toString()];
     },
 
     /**
@@ -888,7 +888,7 @@ var ConnectableDevice = createClass(
     supports: function (arg) {
         var caps = [];
         if (arguments.length === 1) {
-            if (Object.prototype.toString.call(arg) === "array") {
+            if (Object.prototype.toString.call(arg) === "[object Array]") {
                 caps = arg;
             } else {
                 caps = [arg];
@@ -898,9 +898,7 @@ var ConnectableDevice = createClass(
         }
 
         for (var i = 0; i < caps.length; i += 1) {
-            var cap = caps[i];
-
-            if (!this._capabilities[cap]) {
+            if (!this.hasCapability(caps[i])) {
                 return false;
             }
         }
@@ -917,7 +915,7 @@ var ConnectableDevice = createClass(
     supportsAny: function (arg) {
         var caps = [];
         if (arguments.length === 1) {
-            if (Object.prototype.toString.call(arg) === "array") {
+            if (Object.prototype.toString.call(arg) === "[object Array]") {
                 caps = arg;
             } else {
                 caps = [arg];
@@ -927,7 +925,7 @@ var ConnectableDevice = createClass(
         }
 
         for (var i = 0; i < caps.length; i += 1) {
-            if (this._capabilities[caps[i]]) {
+            if (this.hasCapability(caps[i])) {
                 return true;
             }
         }
@@ -2196,6 +2194,10 @@ exports.PairingType = PairingType;
 exports.AirPlayServiceMode = AirPlayServiceMode;
 exports.Services = Services;
 exports.KeyCodes = KeyCodes;
+
+if (typeof __CSDKCapabilities !== "undefined") {
+    exports.Capabilites = __CSDKCapabilities;
+}
 
 // Singleton instance
 exports.discoveryManager = new DiscoveryManager();
