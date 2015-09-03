@@ -15,8 +15,8 @@ var commands = {
 };
 
 var paths = {
-	"ConnectSDK_Repository": "-b dev https://github.com/ConnectSDK/Connect-SDK-Android.git",
-	"ConnectSDK_Tag": "HEAD",
+	"ConnectSDK_Repository": "https://github.com/ConnectSDK/Connect-SDK-Android.git",
+	"ConnectSDK_Tag": "1.6.0",
 	"FlingSDK_URL": "https://s3-us-west-1.amazonaws.com/amazon-fling/AmazonFling-SDK.zip",
 	"AmazonFling_Jar": "./csdk_tmp/android-sdk/lib/AmazonFling.jar",
 	"WhisperPlay_Jar": "./csdk_tmp/android-sdk/lib/android/WhisperPlay.jar"
@@ -115,10 +115,13 @@ AndroidInstall.prototype.cloneConnectSDK = function () {
 		}
 	})
 	.then(function () {
-		return Q.nfcall(exec, "git clone --recursive --depth 1 " + paths.ConnectSDK_Repository + " " + safePath("./cordova-plugin-connectsdk/" + csdkDirectory));
+		return Q.nfcall(exec, "git clone --depth 1 " + paths.ConnectSDK_Repository + " " + safePath("./cordova-plugin-connectsdk/" + csdkDirectory));
 	})
 	.then(function () {
 		return Q.nfcall(exec, "git checkout " + paths.ConnectSDK_Tag, {cwd: safePath("./cordova-plugin-connectsdk/" + csdkDirectory)});
+	})
+	.then(function () {
+		return Q.nfcall(exec, "git submodule update --init", {cwd: safePath("./cordova-plugin-connectsdk/" + csdkDirectory)});
 	})
 	.then(function () {
 		return Q.nfcall(exec, commands.cp + " " + safePath("../../plugins/cordova-plugin-connectsdk/Connect-SDK-Android/build.gradle") + " " + safePath("./cordova-plugin-connectsdk/" + csdkDirectory + "/build-extras.gradle"));
