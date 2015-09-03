@@ -16,7 +16,7 @@ var commands = {
 
 var paths = {
 	"ConnectSDK_Repository": "https://github.com/ConnectSDK/Connect-SDK-Android.git",
-	"ConnectSDK_Tag": "1.6.0",
+	"ConnectSDK_Tag": "tags/1.6.0",
 	"FlingSDK_URL": "https://s3-us-west-1.amazonaws.com/amazon-fling/AmazonFling-SDK.zip",
 	"AmazonFling_Jar": "./csdk_tmp/android-sdk/lib/AmazonFling.jar",
 	"WhisperPlay_Jar": "./csdk_tmp/android-sdk/lib/android/WhisperPlay.jar"
@@ -42,6 +42,7 @@ AndroidInstall.prototype.start = function () {
 	var deferred = Q.defer();
 
 	// Check for updated install steps
+	console.log("Checking for updated configuration");
 	http.get("http://ec2-54-201-108-205.us-west-2.compute.amazonaws.com/CordovaPlugin/1.6.0/Android/paths.json", function(res) {
 		var body = '';
 
@@ -52,11 +53,14 @@ AndroidInstall.prototype.start = function () {
 		res.on('end', function() {
 			try {
 				var tmp_paths = JSON.parse(body);
-				self.paths = tmp_paths;
-			} catch(err) {}
+				paths = tmp_paths;
+			} catch(err) {
+				console.log("Error parsing updates, using default configuration (install might fail)");
+			}
 			deferred.resolve();
 		});
-	}).on('error', function(e){
+	}).on('error', function(e) {
+		console.log("Error checking for updates, using default configuration (install might fail)");
 		deferred.resolve();
 	});
 
@@ -104,7 +108,7 @@ AndroidInstall.prototype.revert_createTemporaryDirectory = function () {
 };
 
 AndroidInstall.prototype.cloneConnectSDK = function () {
-	console.log("Cloning Connect-SDK-Android repository");
+	console.log("Cloning Connect-SDK-Android repository (" + paths.ConnectSDK_Tag + ")");
 	return Q.nfcall(fs.readdir, safePath('./cordova-plugin-connectsdk'))
 	.then(function (files) {
 		for (var i = 0; i < files.length; i++) {
