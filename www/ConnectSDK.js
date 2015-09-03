@@ -2,7 +2,7 @@
  *  ConnectSDK.js
  *  Connect SDK
  *
- *  Copyright (c) 2014 LG Electronics.
+ *  Copyright (c) 2015 LG Electronics.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -345,6 +345,8 @@ var AirPlayServiceMode = {
  * @property {string} NetcastTV - LG 2012/2013 Smart TV with Netcast
  * @property {string} Roku - Roku
  * @property {string} WebOSTV - LG 2014 Smart TV with webOS
+ * @property {string} FireTV - Amazon FireTV
+ * @property {string} AirPlay - Apple AirPlay
  */
 var Services = {
     Chromecast: "Chromecast",
@@ -353,6 +355,8 @@ var Services = {
     NetcastTV: "NetcastTV",
     Roku: "Roku",
     WebOSTV: "webOS TV",
+    FireTV: "FireTV",
+    AirPlay: "AirPlay"
 };
 
 var KeyCodes = {
@@ -818,7 +822,6 @@ var ConnectableDevice = createClass(
     setPairingType: function (pairingType) {
         cordova.exec(this._handleUpdate.bind(this), this._handleError.bind(this), PLUGIN_ID, "setPairingType", [this._deviceId, pairingType]);
     },
-
 
     /**
      * Returns true if device is ready to use.
