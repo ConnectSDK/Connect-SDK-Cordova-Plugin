@@ -161,7 +161,7 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
             e.printStackTrace();
         }
 
-        sendEvent("capabilitiesupdated", obj);
+        sendEvent("capabilitieschanged", obj);
     }
 
     @Override
