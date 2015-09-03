@@ -295,7 +295,6 @@ public class ConnectSDKCordova extends CordovaPlugin {
         wrapper.cleanup();
     }
 
-<<<<<<< HEAD
     private DeviceService.PairingType getPairingTypeFromString(String pairingTypeString) {
         if (JS_PAIRING_TYPE_FIRST_SCREEN.equalsIgnoreCase(pairingTypeString)) {
             return DeviceService.PairingType.FIRST_SCREEN;
@@ -305,7 +304,8 @@ public class ConnectSDKCordova extends CordovaPlugin {
             return DeviceService.PairingType.MIXED;
         }
         return DeviceService.PairingType.NONE;
-=======
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -314,6 +314,5 @@ public class ConnectSDKCordova extends CordovaPlugin {
             picker.hidePicker();
             picker = null;
         }
->>>>>>> dev
     }
 }

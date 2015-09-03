@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="com.connectsdk.cordovaplugin" version="1.2.0">
-	
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="cordova-plugin-connectsdk" version="1.6.0">
+
     <name>Connect SDK</name>
     <description>Connect SDK allows discovery and communication with LG TVs and other smart devices on the local network.</description>
     <license>Apache 2.0</license>
@@ -30,7 +30,7 @@
                 <param name="ios-package" value="ConnectSDKCordova"/>
             </feature>
         </config-file>
-        
+
         <header-file src="src/ios/ConnectSDKCordova.h" />
         <source-file src="src/ios/ConnectSDKCordova.m" />
         <header-file src="src/ios/ConnectSDKCordovaDispatcher.h" />
@@ -39,12 +39,16 @@
         <source-file src="src/ios/ConnectSDKCordovaObjects.m" />
 
         <framework src="libicucore.dylib" />
+        <framework src="libz.dylib" />
+        <framework src="libc++.dylib" />
+        <framework src="AdSupport.framework" />
+        <framework src="Connect-SDK-iOS/GoogleCast.framework" custom="true" type="projectReference" />
+        <framework src="Connect-SDK-iOS/Bolts.framework" custom="true" type="projectReference" />
+        <framework src="Connect-SDK-iOS/AmazonFling.framework" custom="true" type="projectReference" />
+        <framework src="Connect-SDK-iOS/ConnectSDK.framework" custom="true" type="projectReference" />
 
-        <info>
-    Next, you will need to add the Connect SDK iOS library and dependent framworks.
-    Run "cordova prepare ios" and open the Xcode project in platforms/ios
-    Then follow the directions at https://github.com/ConnectSDK/Connect-SDK-iOS
-        </info>
+        <hook type="after_plugin_install" src="scripts/ios-install.js" />
+        <hook type="before_plugin_uninstall" src="scripts/ios-uninstall.js" />
 
     </platform>
 
@@ -81,12 +85,13 @@
         <source-file src="src/android/JSObjectWrapper.java" target-dir="src/com/connectsdk/cordova" />
         <source-file src="src/android/WebAppSessionWrapper.java" target-dir="src/com/connectsdk/cordova" />
         <source-file src="src/android/MediaControlWrapper.java" target-dir="src/com/connectsdk/cordova" />
-	<source-file src="src/android/PlaylistControlWrapper.java" target-dir="src/com/connectsdk/cordova" />
+        <source-file src="src/android/PlaylistControlWrapper.java" target-dir="src/com/connectsdk/cordova" />
 
-        <info>
-    Next, you will need to add the Connect SDK Android project and dependencies to your project.
-    Run "cordova prepare android" and open the Eclipse project in platforms/android
-    Then follow the directions at https://github.com/ConnectSDK/Connect-SDK-Android
-        </info>
+        <hook type="after_plugin_install" src="scripts/android-install.js" />
+        <hook type="before_plugin_uninstall" src="scripts/android-uninstall.js" />
+
+        <framework src="Connect-SDK-Android" custom="true" type="projectReference" weak="true" />
+
     </platform>
+
 </plugin>
