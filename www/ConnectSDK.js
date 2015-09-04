@@ -886,7 +886,7 @@ var ConnectableDevice = createClass(
     },
 
     /**
-     * @param {string} name of capability
+     * @param {string} name of capability. You should use the ConnectSDK.Capabilities constant to reference strings.
      * @returns {boolean} true if device supports the given capability
      */
     hasCapability: function (cap) {
@@ -900,7 +900,7 @@ var ConnectableDevice = createClass(
      * * supports("MediaControl")
      * * supports("VolumeControl.Set", "Launcher")
      * * supports(["TVControl", "Launcher"])
-     * @param [...] - array of capability names
+     * @param [...] - array of capability names. You should use the ConnectSDK.Capabilities constant to reference strings.
      * @returns {boolean} true if all specified capabilities are supported
      */
     supports: function (arg) {
@@ -927,7 +927,7 @@ var ConnectableDevice = createClass(
     /**
      * Like supports() but returns true if any specified capability
      * is supported.
-     * @param [...] - array of capability names
+     * @param [...] - array of capability names. You should use the ConnectSDK.Capabilities constant to reference strings.
      * @returns {boolean} true if any specified capability is supported
      */
     supportsAny: function (arg) {
