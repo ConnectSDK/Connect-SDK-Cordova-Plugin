@@ -242,7 +242,7 @@ var createClass = function (desc) {
  * CapabilityFilter consists of a list of capabilities which
  * must all be present in order for the filter to match.
  *
- * For example, `new ConnectSDK.CapabilityFilter([ConnectSDK.Capabilities.MediaPlayer.Play.Video", ConnectSDK.Capabilities.MediaControl.Pause])`
+ * For example, `new ConnectSDK.CapabilityFilter([ConnectSDK.Capabilities.MediaPlayer.Play.Video, ConnectSDK.Capabilities.MediaControl.Pause])`
  * describes a device that supports showing a video and pausing it.
  */
 var CapabilityFilter = createClass(
@@ -575,7 +575,7 @@ var DiscoveryManager = createClass(
      * ```js
      * // Show devices that support playing videos and pausing OR support launching YouTube with a video id
      * ConnectSDK.discoveryManager.setCapabilityFilters([
-     *     new ConnectSDK.CapabilityFilter([ConnectSDK.Capabilities.MediaPlayer.Display.Video", ConnectSDK.Capabilities.MediaControl.Pause])
+     *     new ConnectSDK.CapabilityFilter([ConnectSDK.Capabilities.MediaPlayer.Play.Video, ConnectSDK.Capabilities.MediaControl.Pause])
      *     new ConnectSDK.CapabilityFilter([ConnectSDK.Capabilities.Launcher.YouTube.Params])
      * ])
      * ```
