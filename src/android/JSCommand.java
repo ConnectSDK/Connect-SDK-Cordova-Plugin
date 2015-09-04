@@ -30,6 +30,7 @@ import org.json.JSONObject;
 import com.connectsdk.core.AppInfo;
 import com.connectsdk.core.ChannelInfo;
 import com.connectsdk.core.JSONSerializable;
+import com.connectsdk.core.Util;
 import com.connectsdk.service.capability.Launcher;
 import com.connectsdk.service.capability.MediaControl.PlayStateListener;
 import com.connectsdk.service.capability.MediaControl.PlayStateStatus;
@@ -43,11 +44,13 @@ import com.connectsdk.service.command.ServiceSubscription;
 import com.connectsdk.service.sessions.LaunchSession;
 import com.connectsdk.service.sessions.WebAppSession;
 
-public class JSCommand {
-    ConnectableDeviceWrapper deviceWrapper;
-    String commandId;
-    boolean subscription;
-    CallbackContext callbackContext;
+import android.util.Log;
+
+class JSCommand {
+    private final ConnectableDeviceWrapper deviceWrapper;
+    private final String commandId;
+    private final boolean subscription;
+    private CallbackContext callbackContext;
     ServiceSubscription<?> serviceSubscription;
 
     JSCommand(ConnectableDeviceWrapper deviceWrapper, String commandId, boolean subscription, CallbackContext callbackContext) {
@@ -57,13 +60,13 @@ public class JSCommand {
         this.callbackContext = callbackContext;
     }
 
-    void checkDone() {
+    private void checkDone() {
         if (subscription) {
             destroy();
         }
     }
 
-    void destroy() {
+    private void destroy() {
         deviceWrapper.cancelCommand(commandId);
     }
 
@@ -75,7 +78,7 @@ public class JSCommand {
         }
     }
 
-    void sendSuccessEvent(Object ... objs) {
+    private void sendSuccessEvent(Object... objs) {
         if (callbackContext == null) return;
 
         JSONArray arr = new JSONArray();
@@ -103,11 +106,11 @@ public class JSCommand {
         sendSuccessEvent(obj);
     }
 
-    public void success(JSONArray arr) {
+    private void success(JSONArray arr) {
         sendSuccessEvent(arr);
     }
 
-    public void success(JSONSerializable obj) {
+    private void success(JSONSerializable obj) {
         JSONObject response = null;
 
         try {
@@ -198,7 +201,7 @@ public class JSCommand {
         };
     }
 
-    JSONArray listToJSON(Iterable<? extends JSONSerializable> list) {
+    private JSONArray listToJSON(Iterable<? extends JSONSerializable> list) {
         JSONArray arr = new JSONArray();
 
         try {
@@ -206,6 +209,7 @@ public class JSCommand {
                 arr.put(item.toJSONObject());
             }
         } catch (JSONException e) {
+            Log.e(Util.T, "listToJSON error", e);
         }
 
         return arr;

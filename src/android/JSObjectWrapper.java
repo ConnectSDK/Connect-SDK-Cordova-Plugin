@@ -26,13 +26,13 @@ import org.json.JSONObject;
 import com.connectsdk.core.JSONSerializable;
 
 public class JSObjectWrapper implements JSONSerializable {
-    ConnectSDKCordova plugin;
-    CallbackContext callbackContext;
+    private final ConnectSDKCordova plugin;
+    private CallbackContext callbackContext;
 
-    static long nextObjectId = 0;
-    public String objectId;
+    private static long nextObjectId = 0;
+    public final String objectId;
 
-    public JSObjectWrapper(ConnectSDKCordova plugin) {
+    JSObjectWrapper(ConnectSDKCordova plugin) {
         this.plugin = plugin;
         this.objectId = "object_" + Long.toString(++nextObjectId);
     }

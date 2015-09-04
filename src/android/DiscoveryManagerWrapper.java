@@ -27,6 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.connectsdk.core.Util;
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.discovery.CapabilityFilter;
 import com.connectsdk.discovery.DiscoveryManager;
@@ -34,10 +35,12 @@ import com.connectsdk.discovery.DiscoveryManager.PairingLevel;
 import com.connectsdk.discovery.DiscoveryManagerListener;
 import com.connectsdk.service.command.ServiceCommandError;
 
-public class DiscoveryManagerWrapper implements DiscoveryManagerListener {
-    ConnectSDKCordova plugin;
-    DiscoveryManager discoveryManager;
-    CallbackContext callbackContext;
+import android.util.Log;
+
+class DiscoveryManagerWrapper implements DiscoveryManagerListener {
+    private final ConnectSDKCordova plugin;
+    private final DiscoveryManager discoveryManager;
+    private CallbackContext callbackContext;
 
     DiscoveryManagerWrapper(ConnectSDKCordova plugin, DiscoveryManager discoveryManager) {
         this.plugin = plugin;
@@ -97,7 +100,6 @@ public class DiscoveryManagerWrapper implements DiscoveryManagerListener {
 
     @Override
     public void onDeviceAdded(DiscoveryManager manager, ConnectableDevice device) {
-        //Log.d(ConnectSDKCordova.LOG_TAG, "sending devicefound event");
         sendDeviceEvent("devicefound", device);
     }
 
@@ -119,22 +121,23 @@ public class DiscoveryManagerWrapper implements DiscoveryManagerListener {
         }
     }
 
-    public JSONObject getDeviceJSON(ConnectableDevice device) {
+    private JSONObject getDeviceJSON(ConnectableDevice device) {
         ConnectableDeviceWrapper wrapper = plugin.getDeviceWrapper(device);
         return wrapper.toJSONObject();
     }
 
-    public void sendDeviceEvent(String event, ConnectableDevice device) {
+    private void sendDeviceEvent(String event, ConnectableDevice device) {
         JSONObject obj = new JSONObject();
         try {
             obj.put("device", getDeviceJSON(device));
         } catch (JSONException e) {
+            Log.e(Util.T, "sendDeviceEvent error", e);
         }
 
         sendEvent(event, obj);
     }
 
-    public void sendEvent(String event, JSONObject obj) {
+    private void sendEvent(String event, JSONObject obj) {
         if (callbackContext != null) {
             plugin.sendEvent(callbackContext, event, obj);
         }

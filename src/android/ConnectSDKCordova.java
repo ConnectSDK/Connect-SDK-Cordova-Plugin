@@ -39,24 +39,28 @@ import com.connectsdk.service.DeviceService;
 import com.connectsdk.service.command.ServiceCommandError;
 
 public class ConnectSDKCordova extends CordovaPlugin {
-    static final String LOG_TAG = "ConnectSDKCordova";
     public static final String JS_PAIRING_TYPE_FIRST_SCREEN = "FIRST_SCREEN";
     public static final String JS_PAIRING_TYPE_PIN = "PIN";
     public static final String JS_PAIRING_TYPE_MIXED = "MIXED";
 
-    DiscoveryManager discoveryManager;
-    DiscoveryManagerWrapper discoveryManagerWrapper;
-    LinkedHashMap<String, ConnectableDeviceWrapper> deviceWrapperById = new LinkedHashMap<String, ConnectableDeviceWrapper>();
-    LinkedHashMap<ConnectableDevice, ConnectableDeviceWrapper> deviceWrapperByDevice = new LinkedHashMap<ConnectableDevice, ConnectableDeviceWrapper>();
+    private static final String LOG_TAG = "ConnectSDKCordova";
 
-    HashMap<String, JSObjectWrapper> objectWrappers = new HashMap<String, JSObjectWrapper>();
+    private DiscoveryManager discoveryManager;
+    private DiscoveryManagerWrapper discoveryManagerWrapper;
+    private final LinkedHashMap<String, ConnectableDeviceWrapper> deviceWrapperById
+            = new LinkedHashMap<String, ConnectableDeviceWrapper>();
+    private final LinkedHashMap<ConnectableDevice, ConnectableDeviceWrapper> deviceWrapperByDevice
+            = new LinkedHashMap<ConnectableDevice, ConnectableDeviceWrapper>();
+
+    private final HashMap<String, JSObjectWrapper> objectWrappers = new HashMap<String, JSObjectWrapper>();
     private SimpleDevicePicker picker;
 
     class NoSuchDeviceException extends Exception {
         private static final long serialVersionUID = 1L;
     }
 
-    synchronized ConnectableDeviceWrapper getDeviceWrapper(String deviceId) throws NoSuchDeviceException {
+    private synchronized ConnectableDeviceWrapper getDeviceWrapper(String deviceId)
+            throws NoSuchDeviceException {
         ConnectableDeviceWrapper wrapper = deviceWrapperById.get(deviceId);
 
         if (wrapper == null) {
@@ -88,7 +92,8 @@ public class ConnectSDKCordova extends CordovaPlugin {
     }
 
     @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext)
+            throws JSONException {
         try {
             if ("sendCommand".equals(action)) {
                 ConnectableDeviceWrapper deviceWrapper = getDeviceWrapper(args.getString(0));
@@ -98,7 +103,8 @@ public class ConnectSDKCordova extends CordovaPlugin {
                 String methodName = args.getString(3);
                 JSONObject methodArgs = args.getJSONObject(4);
                 boolean subscribe = args.getBoolean(5);
-                deviceWrapper.sendCommand(commandId, ifaceName, methodName, methodArgs, subscribe, callbackContext);
+                deviceWrapper.sendCommand(commandId, ifaceName, methodName, methodArgs,
+                        subscribe, callbackContext);
                 return true;
             } else if ("cancelCommand".equals(action)) {
                 ConnectableDeviceWrapper deviceWrapper = getDeviceWrapper(args.getString(0));
@@ -112,7 +118,7 @@ public class ConnectSDKCordova extends CordovaPlugin {
                 startDiscovery(args, callbackContext);
                 return true;
             } else if ("stopDiscovery".equals(action)) {
-                stopDiscovery(args, callbackContext);
+                stopDiscovery(callbackContext);
                 return true;
             } else if ("setDiscoveryConfig".equals(action)) {
                 setDiscoveryConfig(args, callbackContext);
@@ -171,7 +177,7 @@ public class ConnectSDKCordova extends CordovaPlugin {
         return false;
     }
 
-    void initDiscoveryManagerWrapper() {
+    private void initDiscoveryManagerWrapper() {
         if (discoveryManagerWrapper == null) {
             DiscoveryManager.init(cordova.getActivity().getApplicationContext());
             discoveryManager = DiscoveryManager.getInstance();
@@ -179,7 +185,8 @@ public class ConnectSDKCordova extends CordovaPlugin {
         }
     }
 
-    void startDiscovery(JSONArray args, final CallbackContext callbackContext) throws JSONException {
+    private void startDiscovery(JSONArray args, final CallbackContext callbackContext)
+            throws JSONException {
         initDiscoveryManagerWrapper();
 
         if (args.length() > 0) {
@@ -191,7 +198,7 @@ public class ConnectSDKCordova extends CordovaPlugin {
         discoveryManagerWrapper.start();
     }
 
-    void stopDiscovery(JSONArray args, final CallbackContext callbackContext) throws JSONException {
+    private void stopDiscovery(final CallbackContext callbackContext) {
         if (discoveryManagerWrapper != null) {
             discoveryManagerWrapper.stop();
         }
@@ -199,7 +206,8 @@ public class ConnectSDKCordova extends CordovaPlugin {
         callbackContext.success();
     }
 
-    void setDiscoveryConfig(JSONArray args, final CallbackContext callbackContext) throws JSONException {
+    private void setDiscoveryConfig(JSONArray args, final CallbackContext callbackContext)
+            throws JSONException {
         initDiscoveryManagerWrapper();
         discoveryManagerWrapper.configure(args.getJSONObject(0));
 
@@ -290,7 +298,7 @@ public class ConnectSDKCordova extends CordovaPlugin {
         return objectWrappers.get(objectId);
     }
 
-    public void removeObjectWrapper(JSObjectWrapper wrapper) {
+    private void removeObjectWrapper(JSObjectWrapper wrapper) {
         objectWrappers.remove(wrapper.objectId);
         wrapper.cleanup();
     }

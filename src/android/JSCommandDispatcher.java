@@ -39,6 +39,7 @@ import com.connectsdk.core.ExternalInputInfo;
 import com.connectsdk.core.MediaInfo;
 import com.connectsdk.core.SubtitleInfo;
 import com.connectsdk.core.TextInputStatusInfo;
+import com.connectsdk.core.Util;
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.service.DeviceService;
 import com.connectsdk.service.WebOSTVService;
@@ -46,12 +47,18 @@ import com.connectsdk.service.capability.ExternalInputControl;
 import com.connectsdk.service.capability.ExternalInputControl.ExternalInputListListener;
 import com.connectsdk.service.capability.Launcher;
 import com.connectsdk.service.capability.KeyControl.KeyCode;
+import com.connectsdk.service.capability.KeyControl;
 import com.connectsdk.service.capability.MediaControl;
 import com.connectsdk.service.capability.MediaControl.DurationListener;
 import com.connectsdk.service.capability.MediaControl.PositionListener;
 import com.connectsdk.service.capability.MediaPlayer;
 import com.connectsdk.service.capability.PlaylistControl;
+import com.connectsdk.service.capability.MouseControl;
+import com.connectsdk.service.capability.PowerControl;
+import com.connectsdk.service.capability.TVControl;
 import com.connectsdk.service.capability.TextInputControl;
+import com.connectsdk.service.capability.ToastControl;
+import com.connectsdk.service.capability.VolumeControl;
 import com.connectsdk.service.capability.WebAppLauncher;
 import com.connectsdk.service.command.ServiceCommandError;
 import com.connectsdk.service.command.ServiceSubscription;
@@ -60,10 +67,9 @@ import com.connectsdk.service.sessions.WebAppSession;
 import com.connectsdk.service.sessions.WebAppSessionListener;
 
 public class JSCommandDispatcher {
-    ConnectSDKCordova plugin;
-    ConnectableDeviceWrapper deviceWrapper;
-    ConnectableDevice device;
-    HashMap<String, Method> methodCache = new HashMap<String, Method>();
+    private final ConnectSDKCordova plugin;
+    private final ConnectableDevice device;
+    private final HashMap<String, Method> methodCache = new HashMap<String, Method>();
 
     // Annotation used to mark handlers
     @Retention(RetentionPolicy.RUNTIME)
@@ -80,12 +86,11 @@ public class JSCommandDispatcher {
     }
 
     JSCommandDispatcher(ConnectableDeviceWrapper deviceWrapper) {
-        this.deviceWrapper = deviceWrapper;
         this.device = deviceWrapper.device;
         this.plugin = deviceWrapper.plugin;
     }
 
-    Method getMethod(String interfaceName, String methodName) {
+    private Method getMethod(String interfaceName, String methodName) {
         String name = interfaceName + "_" + methodName;
 
         Method method = methodCache.get(name);
@@ -97,17 +102,20 @@ public class JSCommandDispatcher {
                 if (method.isAnnotationPresent(CommandMethod.class)) {
                     methodCache.put(name, method);
                 } else {
-                    Log.d("ConnectSDKCordova", "attempted to access method " + method.getName() + " but method is not a command handler");
+                    Log.d("ConnectSDKCordova", "attempted to access method " + method.getName()
+                            + " but method is not a command handler");
                     method = null;
                 }
             } catch (NoSuchMethodException e) {
+                Log.e(Util.T, "getMethod error", e);
             }
         }
 
         return method;
     }
 
-    public void dispatchCommand(String interfaceName, String methodName, JSCommand command, JSONObject args, boolean subscribe) {
+    public void dispatchCommand(String interfaceName, String methodName, JSCommand command,
+                                JSONObject args) {
         Method method = getMethod(interfaceName, methodName);
 
         if (method != null) {
@@ -119,7 +127,8 @@ public class JSCommandDispatcher {
                 }
             } catch (InvocationTargetException e) {
                 Throwable cause = e.getCause();
-                Exception wrappedException = new DispatcherException("Exception calling " + methodName + ": " + cause.toString());
+                Exception wrappedException = new DispatcherException("Exception calling "
+                        + methodName + ": " + cause.toString());
                 wrappedException.initCause(cause);
 
                 wrappedException.printStackTrace();
@@ -129,7 +138,8 @@ public class JSCommandDispatcher {
                 command.error(e);
             }
         } else {
-            Log.d("ConnectSDKCordova", "Method not implemented: " + interfaceName + "." + methodName);
+            Log.d("ConnectSDKCordova", "Method not implemented: " + interfaceName
+                    + "." + methodName);
             command.error("method not implemented");
         }
     }
@@ -137,8 +147,11 @@ public class JSCommandDispatcher {
     /* ExternalInputControl methods */
 
     @CommandMethod
-    public void externalInputControl_getExternalInputList(final JSCommand command, JSONObject args) throws JSONException {
-        device.getExternalInputControl().getExternalInputList(new ExternalInputListListener() {
+    public void externalInputControl_getExternalInputList(final JSCommand command,
+                                                          JSONObject args) throws JSONException {
+        device.getCapability(ExternalInputControl.class)
+                .getExternalInputList(new ExternalInputListListener() {
+
             @Override
             public void onSuccess(List<ExternalInputInfo> list) {
                 command.success(list);
@@ -152,7 +165,8 @@ public class JSCommandDispatcher {
     }
 
     @CommandMethod
-    public void externalInputControl_setExternalInput(JSCommand command, JSONObject args) throws JSONException {
+    public void externalInputControl_setExternalInput(JSCommand command,
+                                                      JSONObject args) throws JSONException {
         JSONObject externalInputInfoObj = args.getJSONObject("externalInputInfo");
         String inputId = externalInputInfoObj.getString("id");
 
@@ -160,7 +174,8 @@ public class JSCommandDispatcher {
         ExternalInputInfo info = new ExternalInputInfo();
         info.setId(inputId);
 
-        device.getExternalInputControl().setExternalInput(info, command.getResponseListener());
+        device.getCapability(ExternalInputControl.class).setExternalInput(info, command
+                .getResponseListener());
     }
 
     @CommandMethod
@@ -172,38 +187,38 @@ public class JSCommandDispatcher {
     /* FivewayControl methods */
 
     @CommandMethod
-    public void keyControl_up(JSCommand command, JSONObject args) throws JSONException {
-        device.getKeyControl().up(command.getResponseListener());
+    public void keyControl_up(JSCommand command, JSONObject args) {
+        device.getCapability(KeyControl.class).up(command.getResponseListener());
     }
 
     @CommandMethod
-    public void keyControl_down(JSCommand command, JSONObject args) throws JSONException {
-        device.getKeyControl().down(command.getResponseListener());
+    public void keyControl_down(JSCommand command, JSONObject args) {
+        device.getCapability(KeyControl.class).down(command.getResponseListener());
     }
 
     @CommandMethod
-    public void keyControl_left(JSCommand command, JSONObject args) throws JSONException {
-        device.getKeyControl().left(command.getResponseListener());
+    public void keyControl_left(JSCommand command, JSONObject args) {
+        device.getCapability(KeyControl.class).left(command.getResponseListener());
     }
 
     @CommandMethod
-    public void keyControl_right(JSCommand command, JSONObject args) throws JSONException {
-        device.getKeyControl().right(command.getResponseListener());
+    public void keyControl_right(JSCommand command, JSONObject args) {
+        device.getCapability(KeyControl.class).right(command.getResponseListener());
     }
 
     @CommandMethod
-    public void keyControl_ok(JSCommand command, JSONObject args) throws JSONException {
-        device.getKeyControl().ok(command.getResponseListener());
+    public void keyControl_ok(JSCommand command, JSONObject args) {
+        device.getCapability(KeyControl.class).ok(command.getResponseListener());
     }
 
     @CommandMethod
-    public void keyControl_back(JSCommand command, JSONObject args) throws JSONException {
-        device.getKeyControl().back(command.getResponseListener());
+    public void keyControl_back(JSCommand command, JSONObject args) {
+        device.getCapability(KeyControl.class).back(command.getResponseListener());
     }
 
     @CommandMethod
-    public void keyControl_home(JSCommand command, JSONObject args) throws JSONException {
-        device.getKeyControl().home(command.getResponseListener());
+    public void keyControl_home(JSCommand command, JSONObject args) {
+        device.getCapability(KeyControl.class).home(command.getResponseListener());
     }
 
     @CommandMethod
@@ -218,31 +233,33 @@ public class JSCommandDispatcher {
     @CommandMethod
     public void textInputControl_sendText(JSCommand command, JSONObject args) throws JSONException {
         String text = args.getString("input");
-        device.getTextInputControl().sendText(text);
+        device.getCapability(TextInputControl.class).sendText(text);
 
         // FIXME keyboardControl needs a ResponseListener
         command.success();
     }
 
     @CommandMethod
-    public void textInputControl_sendEnter(JSCommand command, JSONObject args) throws JSONException {
-        device.getTextInputControl().sendEnter();
+    public void textInputControl_sendEnter(JSCommand command, JSONObject args) {
+        device.getCapability(TextInputControl.class).sendEnter();
 
         // FIXME keyboardControl needs a ResponseListener
         command.success();
     }
 
     @CommandMethod
-    public void textInputControl_sendDelete(JSCommand command, JSONObject args) throws JSONException {
-        device.getTextInputControl().sendDelete();
+    public void textInputControl_sendDelete(JSCommand command, JSONObject args) {
+        device.getCapability(TextInputControl.class).sendDelete();
 
         // FIXME keyboardControl needs a ResponseListener
         command.success();
     }
 
     @CommandMethod
-    public ServiceSubscription<?> textInputControl_subscribeTextInputStatus(final JSCommand command, JSONObject args) throws JSONException {
-        return device.getTextInputControl().subscribeTextInputStatus(new TextInputControl.TextInputStatusListener() {
+    public ServiceSubscription<?> textInputControl_subscribeTextInputStatus(final JSCommand command,
+                                                                            JSONObject args) {
+        return device.getCapability(TextInputControl.class)
+                .subscribeTextInputStatus(new TextInputControl.TextInputStatusListener() {
             @Override
             public void onError(ServiceCommandError error) {
                 command.error(error);
@@ -274,85 +291,88 @@ public class JSCommandDispatcher {
         AppInfo appInfo = new AppInfo();
         appInfo.setId(appId);
 
-        device.getLauncher().launchAppWithInfo(appInfo, params, command.getAppLaunchListener());
+        device.getCapability(Launcher.class).launchAppWithInfo(appInfo, params, command
+                .getAppLaunchListener());
     }
 
     @CommandMethod
-    public void launcher_launchAppStore(JSCommand command, JSONObject args) throws JSONException {
+    public void launcher_launchAppStore(JSCommand command, JSONObject args) {
         String appId = args.optString("appId");
-        device.getLauncher().launchAppStore(appId, command.getAppLaunchListener());
+        device.getCapability(Launcher.class).launchAppStore(appId, command.getAppLaunchListener());
     }
 
     @CommandMethod
-    public void launcher_launchBrowser(JSCommand command, JSONObject args) throws JSONException {
+    public void launcher_launchBrowser(JSCommand command, JSONObject args) {
         String url = args.optString("url", null);
 
-        device.getLauncher().launchBrowser(url, command.getAppLaunchListener());
+        device.getCapability(Launcher.class).launchBrowser(url, command.getAppLaunchListener());
     }
 
     @CommandMethod
     public void launcher_launchHulu(JSCommand command, JSONObject args) throws JSONException {
         String contentId = args.optString("contentId");
-        device.getLauncher().launchHulu(contentId, command.getAppLaunchListener());
+        device.getCapability(Launcher.class).launchHulu(contentId, command.getAppLaunchListener());
     }
 
     @CommandMethod
     public void launcher_launchNetflix(JSCommand command, JSONObject args) throws JSONException {
         String contentId = args.optString("contentId");
-        device.getLauncher().launchNetflix(contentId, command.getAppLaunchListener());
+        device.getCapability(Launcher.class)
+                .launchNetflix(contentId, command.getAppLaunchListener());
     }
 
     @CommandMethod
     public void launcher_launchYouTube(JSCommand command, JSONObject args) throws JSONException {
         String contentId = args.optString("contentId");
-        device.getLauncher().launchYouTube(contentId, command.getAppLaunchListener());
+        device.getCapability(Launcher.class)
+                .launchYouTube(contentId, command.getAppLaunchListener());
     }
 
     @CommandMethod
     public void launcher_getAppList(JSCommand command, JSONObject args) throws JSONException {
-        device.getLauncher().getAppList(command.getAppListListener());
+        device.getCapability(Launcher.class).getAppList(command.getAppListListener());
     }
 
     /* MediaControl methods */
 
     @CommandMethod
     public void mediaControl_play(JSCommand command, JSONObject args) throws JSONException {
-        MediaControl mediaControl = getMediaControl(command, args);
+        MediaControl mediaControl = getMediaControl(args);
 
         mediaControl.play(command.getResponseListener());
     }
 
     @CommandMethod
     public void mediaControl_pause(JSCommand command, JSONObject args) throws JSONException {
-        MediaControl mediaControl = getMediaControl(command, args);
+        MediaControl mediaControl = getMediaControl(args);
 
         mediaControl.pause(command.getResponseListener());
     }
 
     @CommandMethod
     public void mediaControl_stop(JSCommand command, JSONObject args) throws JSONException {
-        MediaControl mediaControl = getMediaControl(command, args);
+        MediaControl mediaControl = getMediaControl(args);
 
         mediaControl.stop(command.getResponseListener());
     }
 
     @CommandMethod
     public void mediaControl_fastForward(JSCommand command, JSONObject args) throws JSONException {
-        MediaControl mediaControl = getMediaControl(command, args);
+        MediaControl mediaControl = getMediaControl(args);
 
         mediaControl.fastForward(command.getResponseListener());
     }
 
     @CommandMethod
     public void mediaControl_rewind(JSCommand command, JSONObject args) throws JSONException {
-        MediaControl mediaControl = getMediaControl(command, args);
+        MediaControl mediaControl = getMediaControl(args);
 
         mediaControl.rewind(command.getResponseListener());
     }
 
     @CommandMethod
     public void mediaControl_seek(JSCommand command, JSONObject args) throws JSONException {
-        MediaControl mediaControl = getMediaControl(command, args);
+        MediaControl mediaControl = getMediaControl(args);
 
         double positionSeconds = args.getDouble("position");
         long positionMillis = (long) (1000L * positionSeconds);
@@ -361,8 +381,9 @@ public class JSCommandDispatcher {
     }
 
     @CommandMethod
-    public void mediaControl_getDuration(final JSCommand command, JSONObject args) throws JSONException {
-        MediaControl mediaControl = getMediaControl(command, args);
+    public void mediaControl_getDuration(final JSCommand command,
+                                         JSONObject args) throws JSONException {
+        MediaControl mediaControl = getMediaControl(args);
 
         mediaControl.getDuration(new DurationListener() {
             @Override
@@ -378,8 +399,9 @@ public class JSCommandDispatcher {
     }
 
     @CommandMethod
-    public void mediaControl_getPosition(final JSCommand command, JSONObject args) throws JSONException {
-        MediaControl mediaControl = getMediaControl(command, args);
+    public void mediaControl_getPosition(final JSCommand command,
+                                         JSONObject args) throws JSONException {
+        MediaControl mediaControl = getMediaControl(args);
 
         mediaControl.getPosition(new PositionListener() {
             @Override
@@ -395,8 +417,9 @@ public class JSCommandDispatcher {
     }
 
     @CommandMethod
-    public void mediaControl_subscribePlayState(final JSCommand command, JSONObject args) throws JSONException {
-        MediaControl mediaControl = getMediaControl(command, args);
+    public void mediaControl_subscribePlayState(final JSCommand command,
+                                                JSONObject args) throws JSONException {
+        MediaControl mediaControl = getMediaControl(args);
 
         mediaControl.subscribePlayState(command.getPlayStateListener());
     }
@@ -405,7 +428,7 @@ public class JSCommandDispatcher {
 
     @CommandMethod
     public void playlistControl_next(JSCommand command, JSONObject args) throws JSONException {
-        PlaylistControl playlistControl = getPlaylistControl(command, args);
+        PlaylistControl playlistControl = getPlaylistControl(args);
 
         if (playlistControl != null) {
             playlistControl.next(command.getResponseListener());
@@ -416,7 +439,7 @@ public class JSCommandDispatcher {
 
     @CommandMethod
     public void playlistControl_previous(JSCommand command, JSONObject args) throws JSONException {
-        PlaylistControl playlistControl = getPlaylistControl(command, args);
+        PlaylistControl playlistControl = getPlaylistControl(args);
 
         if (playlistControl != null) {
             playlistControl.previous(command.getResponseListener());
@@ -427,7 +450,7 @@ public class JSCommandDispatcher {
 
     @CommandMethod
     public void playlistControl_jumpToTrack(JSCommand command, JSONObject args) throws JSONException {
-        PlaylistControl playlistControl = getPlaylistControl(command, args);
+        PlaylistControl playlistControl = getPlaylistControl(args);
 
         if (playlistControl != null) {
             long position = args.getLong("index");
@@ -453,7 +476,7 @@ public class JSCommandDispatcher {
 
     @CommandMethod
     public void mouseControl_connectMouse(JSCommand command, JSONObject args) throws JSONException {
-        device.getMouseControl().connectMouse();
+        device.getCapability(MouseControl.class).connectMouse();
 
         // FIXME check if this actually worked
         command.success();
@@ -464,7 +487,7 @@ public class JSCommandDispatcher {
         double dx = args.getDouble("dx");
         double dy = args.getDouble("dy");
 
-        device.getMouseControl().move(dx, dy);
+        device.getCapability(MouseControl.class).move(dx, dy);
 
         // FIXME check if this actually worked
         command.success();
@@ -475,7 +498,7 @@ public class JSCommandDispatcher {
         double dx = args.getDouble("dx");
         double dy = args.getDouble("dy");
 
-        device.getMouseControl().scroll(dx, dy);
+        device.getCapability(MouseControl.class).scroll(dx, dy);
 
         // FIXME check if this actually worked
         command.success();
@@ -483,7 +506,7 @@ public class JSCommandDispatcher {
 
     @CommandMethod
     public void mouseControl_click(JSCommand command, JSONObject args) throws JSONException {
-        device.getMouseControl().click();
+        device.getCapability(MouseControl.class).click();
 
         // FIXME check if this actually worked
         command.success();
@@ -492,7 +515,7 @@ public class JSCommandDispatcher {
     /* PowerControl methods */
     @CommandMethod
     public void powerControl_powerOff(JSCommand command, JSONObject args) throws JSONException {
-        device.getPowerControl().powerOff(command.getResponseListener());
+        device.getCapability(PowerControl.class).powerOff(command.getResponseListener());
     }
 
     /* ToastControl methods */
@@ -503,7 +526,8 @@ public class JSCommandDispatcher {
     }
 
     @CommandMethod
-    public void toastControl_showClickableToast(JSCommand command, JSONObject args) throws JSONException {
+    public void toastControl_showClickableToast(JSCommand command,
+                                                JSONObject args) throws JSONException {
         showToast(command, args, true);
     }
 
@@ -511,12 +535,12 @@ public class JSCommandDispatcher {
 
     @CommandMethod
     public void TVControl_channelUp(JSCommand command, JSONObject args) throws JSONException {
-        device.getTVControl().channelUp(command.getResponseListener());
+        device.getCapability(TVControl.class).channelUp(command.getResponseListener());
     }
 
     @CommandMethod
     public void TVControl_channelDown(JSCommand command, JSONObject args) throws JSONException {
-        device.getTVControl().channelDown(command.getResponseListener());
+        device.getCapability(TVControl.class).channelDown(command.getResponseListener());
     }
 
     @CommandMethod
@@ -529,107 +553,118 @@ public class JSCommandDispatcher {
         channelInfo.setId(channelId);
         channelInfo.setNumber(channelNumber);
 
-        device.getTVControl().setChannel(channelInfo, command.getResponseListener());
+        device.getCapability(TVControl.class).setChannel(channelInfo, command.getResponseListener());
     }
 
     @CommandMethod
-    public void TVControl_getChannelList(JSCommand command, JSONObject args) throws JSONException {
-        device.getTVControl().getChannelList(command.getChannelListListener());
+    public void TVControl_getChannelList(JSCommand command, JSONObject args) {
+        device.getCapability(TVControl.class).getChannelList(command.getChannelListListener());
     }
 
     @CommandMethod
-    public void TVControl_getCurrentChannel(JSCommand command, JSONObject args) throws JSONException {
-        device.getTVControl().getCurrentChannel(command.getChannelListener());
+    public void TVControl_getCurrentChannel(JSCommand command, JSONObject args) {
+        device.getCapability(TVControl.class).getCurrentChannel(command.getChannelListener());
     }
 
     @CommandMethod
-    public void TVControl_subscribeCurrentChannel(JSCommand command, JSONObject args) throws JSONException {
-        device.getTVControl().subscribeCurrentChannel(command.getChannelListener());
+    public void TVControl_subscribeCurrentChannel(JSCommand command, JSONObject args) {
+        device.getCapability(TVControl.class).subscribeCurrentChannel(command.getChannelListener());
     }
 
     /* VolumeControl methods */
 
     @CommandMethod
-    public void volumeControl_getVolume(JSCommand command, JSONObject args) throws JSONException {
-        device.getVolumeControl().getVolume(command.getVolumeListener());
+    public void volumeControl_getVolume(JSCommand command, JSONObject args) {
+        device.getCapability(VolumeControl.class).getVolume(command.getVolumeListener());
     }
 
     @CommandMethod
     public void volumeControl_setVolume(JSCommand command, JSONObject args) throws JSONException {
         float volume = (float) args.getDouble("volume");
 
-        device.getVolumeControl().setVolume(volume, command.getResponseListener());
+        device.getCapability(VolumeControl.class).setVolume(volume, command.getResponseListener());
     }
 
     @CommandMethod
-    public void volumeControl_volumeUp(JSCommand command, JSONObject args) throws JSONException {
-        device.getVolumeControl().volumeUp(command.getResponseListener());
+    public void volumeControl_volumeUp(JSCommand command, JSONObject args) {
+        device.getCapability(VolumeControl.class).volumeUp(command.getResponseListener());
     }
 
     @CommandMethod
-    public void volumeControl_volumeDown(JSCommand command, JSONObject args) throws JSONException {
-        device.getVolumeControl().volumeDown(command.getResponseListener());
+    public void volumeControl_volumeDown(JSCommand command, JSONObject args) {
+        device.getCapability(VolumeControl.class).volumeDown(command.getResponseListener());
     }
 
     @CommandMethod
-    public void volumeControl_getMute(JSCommand command, JSONObject args) throws JSONException {
-        device.getVolumeControl().getMute(command.getMuteListener());
+    public void volumeControl_getMute(JSCommand command, JSONObject args) {
+        device.getCapability(VolumeControl.class).getMute(command.getMuteListener());
     }
 
     @CommandMethod
     public void volumeControl_setMute(JSCommand command, JSONObject args) throws JSONException {
         boolean mute = args.getBoolean("mute");
-        device.getVolumeControl().setMute(mute, command.getResponseListener());
+        device.getCapability(VolumeControl.class).setMute(mute, command.getResponseListener());
     }
 
     @CommandMethod
-    public ServiceSubscription<?> volumeControl_subscribeVolume(JSCommand command, JSONObject args) throws JSONException {
-        return device.getVolumeControl().subscribeVolume(command.getVolumeListener());
+    public ServiceSubscription<?> volumeControl_subscribeVolume(JSCommand command,
+                                                                JSONObject args) {
+        return device.getCapability(VolumeControl.class)
+                .subscribeVolume(command.getVolumeListener());
     }
 
     @CommandMethod
-    public ServiceSubscription<?> volumeControl_subscribeMute(JSCommand command, JSONObject args) throws JSONException {
-        return device.getVolumeControl().subscribeMute(command.getMuteListener());
+    public ServiceSubscription<?> volumeControl_subscribeMute(JSCommand command, JSONObject args) {
+        return device.getCapability(VolumeControl.class).subscribeMute(command.getMuteListener());
     }
 
     /* WebAppLauncher methods */
     @CommandMethod
-    public void webAppLauncher_launchWebApp(JSCommand command, JSONObject args) throws JSONException {
+    public void webAppLauncher_launchWebApp(JSCommand command,
+                                            JSONObject args) throws JSONException {
         String webAppId = args.getString("webAppId");
         JSONObject params = args.optJSONObject("params");
 
-        if (params != null && device.hasCapability(WebAppLauncher.Launch_Params))
-            device.getWebAppLauncher().launchWebApp(webAppId, params, command.getWebAppLaunchListener());
-        else
-            device.getWebAppLauncher().launchWebApp(webAppId, command.getWebAppLaunchListener());
+        if (params != null && device.hasCapability(WebAppLauncher.Launch_Params)) {
+            device.getCapability(WebAppLauncher.class)
+                    .launchWebApp(webAppId, params, command.getWebAppLaunchListener());
+        } else {
+            device.getCapability(WebAppLauncher.class)
+                    .launchWebApp(webAppId, command.getWebAppLaunchListener());
+        }
     }
 
     @CommandMethod
     public void webAppLauncher_joinWebApp(JSCommand command, JSONObject args) throws JSONException {
         String webAppId = args.getString("webAppId");
 
-        device.getWebAppLauncher().joinWebApp(webAppId, command.getWebAppLaunchListener());
+        device.getCapability(WebAppLauncher.class)
+                .joinWebApp(webAppId, command.getWebAppLaunchListener());
     }
 
     @CommandMethod
     public void webAppLauncher_pinWebApp(JSCommand command, JSONObject args) throws JSONException {
         String webAppId = args.getString("webAppId");
 
-        device.getWebAppLauncher().pinWebApp(webAppId, command.getResponseListener());
+        device.getCapability(WebAppLauncher.class)
+                .pinWebApp(webAppId, command.getResponseListener());
     }
 
     @CommandMethod
-    public void webAppLauncher_unPinWebApp(JSCommand command, JSONObject args) throws JSONException {
+    public void webAppLauncher_unPinWebApp(JSCommand command,
+                                           JSONObject args) throws JSONException {
         String webAppId = args.getString("webAppId");
 
-        device.getWebAppLauncher().unPinWebApp(webAppId, command.getResponseListener());
+        device.getCapability(WebAppLauncher.class)
+                .unPinWebApp(webAppId, command.getResponseListener());
     }
 
     @CommandMethod
-    public void webAppLauncher_isWebAppPinned(final JSCommand command, JSONObject args) throws JSONException {
+    public void webAppLauncher_isWebAppPinned(final JSCommand command,
+                                              JSONObject args) throws JSONException {
         String webAppId = args.getString("webAppId");
 
-        device.getWebAppLauncher().isWebAppPinned(webAppId, new WebAppSession
+        device.getCapability(WebAppLauncher.class).isWebAppPinned(webAppId, new WebAppSession
                 .WebAppPinStatusListener() {
             @Override
             public void onSuccess(Boolean object) {
@@ -644,31 +679,34 @@ public class JSCommandDispatcher {
     }
 
     @CommandMethod
-    public ServiceSubscription<?> webAppLauncher_subscribeIsWebAppPinned(final JSCommand command, JSONObject args) throws JSONException {
+    public ServiceSubscription<?> webAppLauncher_subscribeIsWebAppPinned(
+            final JSCommand command, JSONObject args) throws JSONException {
         String webAppId = args.getString("webAppId");
 
-        return device.getWebAppLauncher().subscribeIsWebAppPinned(webAppId, new WebAppSession.WebAppPinStatusListener() {
+        return device.getCapability(WebAppLauncher.class)
+                .subscribeIsWebAppPinned(webAppId, new WebAppSession.WebAppPinStatusListener() {
 
-            @Override
-            public void onSuccess(Boolean object) {
-                command.success(object);
-            }
+                    @Override
+                    public void onSuccess(Boolean object) {
+                        command.success(object);
+                    }
 
-            @Override
-            public void onError(ServiceCommandError error) {
-                command.error(error);
-            }
-        });
+                    @Override
+                    public void onError(ServiceCommandError error) {
+                        command.error(error);
+                    }
+                });
     }
 
 
     /* WebAppSession methods */
 
-    WebAppSessionWrapper getWebAppSessionWrapper(String objectId) {
+    private WebAppSessionWrapper getWebAppSessionWrapper(String objectId) {
         WebAppSessionWrapper wrapper = (WebAppSessionWrapper) plugin.getObjectWrapper(objectId);
 
         if (wrapper == null) {
-            throw new DispatcherException("WebAppSession no longer exists. Make sure to acquire() it during the success callback.");
+            throw new DispatcherException("WebAppSession no longer exists. " +
+                    "Make sure to acquire() it during the success callback.");
         }
 
         return wrapper;
@@ -693,7 +731,8 @@ public class JSCommandDispatcher {
     }
 
     @CommandMethod
-    public void webAppSession_setWebAppSessionListener(JSCommand command, JSONObject args) throws JSONException {
+    public void webAppSession_setWebAppSessionListener(JSCommand command,
+                                                       JSONObject args) throws JSONException {
         String objectId = args.getString("objectId");
         final WebAppSessionWrapper wrapper = getWebAppSessionWrapper(objectId);
 
@@ -732,7 +771,8 @@ public class JSCommandDispatcher {
 
     /* Service-specific methods */
     @CommandMethod
-    public void webOSTVService_connectToApp(JSCommand command, JSONObject args) throws JSONException {
+    public void webOSTVService_connectToApp(JSCommand command,
+                                            JSONObject args) throws JSONException {
         WebOSTVService service = (WebOSTVService) device.getServiceByName(WebOSTVService.ID);
 
         String appId = args.getString("appId");
@@ -760,7 +800,8 @@ public class JSCommandDispatcher {
     /* Special methods */
 
     @CommandMethod
-    public void CORDOVAPLUGIN_closeLaunchSession(JSCommand command, JSONObject args) throws JSONException {
+    public void CORDOVAPLUGIN_closeLaunchSession(JSCommand command,
+                                                 JSONObject args) throws JSONException {
         JSONObject obj = args.getJSONObject("launchSession");
         LaunchSession session = getLaunchSession(obj);
 
@@ -773,7 +814,8 @@ public class JSCommandDispatcher {
 
     /* Helper methods */
 
-    void displayMedia(JSCommand command, JSONObject args, String type) throws JSONException {
+    private void displayMedia(JSCommand command, JSONObject args,
+                              String type) throws JSONException {
         String url = args.getString("url");
         String mimeType = args.getString("mimeType");
 
@@ -815,7 +857,8 @@ public class JSCommandDispatcher {
         }
     }
 
-    void showToast(JSCommand command, JSONObject args, boolean clickable) throws JSONException {
+    private void showToast(JSCommand command, JSONObject args,
+                           boolean clickable) throws JSONException {
         String message = args.getString("message");
         JSONObject options = args.optJSONObject("options");
 
@@ -838,21 +881,24 @@ public class JSCommandDispatcher {
 
         if (clickable) {
             if (url != null) {
-                device.getToastControl().showClickableToastForURL(message, url, iconData, iconExtension, command.getResponseListener());
+                device.getCapability(ToastControl.class).showClickableToastForURL(message, url,
+                        iconData, iconExtension, command.getResponseListener());
             } else if (appId != null) {
                 AppInfo appInfo = new AppInfo();
                 appInfo.setId(appId);
-                device.getToastControl().showClickableToastForApp(message, appInfo, params, iconData, iconExtension, command.getResponseListener());
+                device.getCapability(ToastControl.class).showClickableToastForApp(message, appInfo,
+                        params, iconData, iconExtension, command.getResponseListener());
             } else {
-                command.error("toast options must include url or appId when showing a clickable toast");
+                command.error("toast options must include url or appId when showing " +
+                        "a clickable toast");
             }
         } else {
-            device.getToastControl().showToast(message, iconData, iconExtension, command
-                    .getResponseListener());
+            device.getCapability(ToastControl.class).showToast(message, iconData, iconExtension,
+                    command.getResponseListener());
         }
     }
 
-    LaunchSession getLaunchSession(JSONObject obj) {
+    private LaunchSession getLaunchSession(JSONObject obj) {
         LaunchSession session = LaunchSession.launchSessionFromJSONObject(obj);
         String serviceName = obj.optString("serviceName");
         DeviceService service = serviceName != null ? device.getServiceByName(serviceName) : null;
@@ -864,7 +910,7 @@ public class JSCommandDispatcher {
         return session;
     }
 
-    MediaControl getMediaControl(JSCommand command, JSONObject args) throws JSONException {
+    private MediaControl getMediaControl(JSONObject args) {
         if (args.has("objectId")) {
             String objectId = args.optString("objectId");
             MediaControlWrapper wrapper = (MediaControlWrapper) plugin.getObjectWrapper(objectId);
@@ -875,11 +921,11 @@ public class JSCommandDispatcher {
                 throw new DispatcherException("MediaControl session no longer exists");
             }
         } else {
-            return device.getMediaControl();
+            return device.getCapability(MediaControl.class);
         }
     }
 
-    PlaylistControl getPlaylistControl(JSCommand command, JSONObject args) throws JSONException {
+    PlaylistControl getPlaylistControl(JSONObject args) throws JSONException {
         if (args.has("objectId")) {
             String objectId = args.optString("objectId");
             PlaylistControlWrapper wrapper = (PlaylistControlWrapper) plugin.getObjectWrapper(objectId);

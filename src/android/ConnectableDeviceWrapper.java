@@ -30,6 +30,7 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.connectsdk.core.Util;
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.device.ConnectableDeviceListener;
 import com.connectsdk.service.DeviceService;
@@ -37,13 +38,13 @@ import com.connectsdk.service.DeviceService.PairingType;
 import com.connectsdk.service.command.ServiceCommandError;
 
 class ConnectableDeviceWrapper implements ConnectableDeviceListener {
-    ConnectSDKCordova plugin;
-    String deviceId;
-    ConnectableDevice device;
-    CallbackContext callbackContext;
-    HashMap<String, JSCommand> commands = new HashMap<String, JSCommand>();
-    JSCommandDispatcher dispatcher;
-    boolean active = false;
+    final ConnectSDKCordova plugin;
+    final String deviceId;
+    final ConnectableDevice device;
+    private CallbackContext callbackContext;
+    private final HashMap<String, JSCommand> commands = new HashMap<String, JSCommand>();
+    private final JSCommandDispatcher dispatcher;
+    private boolean active = false;
 
     public ConnectableDeviceWrapper(ConnectSDKCordova plugin, ConnectableDevice device) {
         this.plugin = plugin;
@@ -64,7 +65,7 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
     }
 
     // Active means that the wrapper is actively listening for events
-    public void setActive(boolean activate) {
+    private void setActive(boolean activate) {
         if (!active && activate) {
             this.device.addListener(this);
             active = true;
@@ -99,6 +100,7 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
 
             obj.put("services", services);
         } catch (JSONException e) {
+            Log.e(Util.T, "toJSONObject error", e);
         }
 
         return obj;
@@ -112,12 +114,13 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
         this.device.disconnect();
     }
 
-    public void sendCommand(String commandId, String ifaceName, String methodName, JSONObject args, boolean subscribe, CallbackContext callbackContext) {
+    public void sendCommand(String commandId, String ifaceName, String methodName, JSONObject args,
+                            boolean subscribe, CallbackContext callbackContext) {
         JSCommand command = new JSCommand(this, commandId, subscribe, callbackContext);
         commands.put(commandId, command);
 
         Log.d("ConnectSDK", "dispatching command " + ifaceName + "." + methodName);
-        this.dispatcher.dispatchCommand(ifaceName, methodName, command, args, subscribe);
+        this.dispatcher.dispatchCommand(ifaceName, methodName, command, args);
     }
 
     public void cancelCommand(String commandId) {
@@ -128,7 +131,7 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
         }
     }
 
-    void sendEvent(String event, Object ...objs) {
+    private void sendEvent(String event, Object... objs) {
         if (callbackContext != null) {
             plugin.sendEvent(callbackContext, event, objs);
         }
@@ -150,7 +153,8 @@ class ConnectableDeviceWrapper implements ConnectableDeviceListener {
     }
 
     @Override
-    public void onCapabilityUpdated(ConnectableDevice device, List<String> added, List<String> removed) {
+    public void onCapabilityUpdated(ConnectableDevice device, List<String> added,
+                                    List<String> removed) {
         JSONObject obj = new JSONObject();
 
         try {
