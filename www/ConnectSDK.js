@@ -242,7 +242,7 @@ var createClass = function (desc) {
  * CapabilityFilter consists of a list of capabilities which
  * must all be present in order for the filter to match.
  *
- * For example, `new ConnectSDK.CapabilityFilter(["MediaPlayer.Display.Video", "MediaControl.Pause"])`
+ * For example, `new ConnectSDK.CapabilityFilter([ConnectSDK.Capabilities.MediaPlayer.Play.Video", ConnectSDK.Capabilities.MediaControl.Pause])`
  * describes a device that supports showing a video and pausing it.
  */
 var CapabilityFilter = createClass(
@@ -575,8 +575,8 @@ var DiscoveryManager = createClass(
      * ```js
      * // Show devices that support playing videos and pausing OR support launching YouTube with a video id
      * ConnectSDK.discoveryManager.setCapabilityFilters([
-     *     new ConnectSDK.CapabilityFilter(["MediaPlayer.Display.Video", "MediaControl.Pause"])
-     *     new ConnectSDK.CapabilityFilter(["Launcher.YouTube.Params"])
+     *     new ConnectSDK.CapabilityFilter([ConnectSDK.Capabilities.MediaPlayer.Display.Video", ConnectSDK.Capabilities.MediaControl.Pause])
+     *     new ConnectSDK.CapabilityFilter([ConnectSDK.Capabilities.Launcher.YouTube.Params])
      * ])
      * ```
      *
@@ -897,9 +897,9 @@ var ConnectableDevice = createClass(
      * Flexible version of hasCapability which returns true
      * if all of the capabilities specified are supported.
      *
-     * * supports("MediaControl")
-     * * supports("VolumeControl.Set", "Launcher")
-     * * supports(["TVControl", "Launcher"])
+     * * supports(ConnectSDK.Capabilities.MediaControl.Any)
+     * * supports(ConnectSDK.Capabilities.VolumeControl.Set, ConnectSDK.Capabilities.Launcher.Any)
+     * * supports([ConnectSDK.Capabilities.TVControl.Any, ConnectSDK.Capabilities.Launcher.Any])
      * @param [...] - array of capability names. You should use the ConnectSDK.Capabilities constant to reference strings.
      * @returns {boolean} true if all specified capabilities are supported
      */
