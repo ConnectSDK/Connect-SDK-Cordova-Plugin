@@ -359,6 +359,21 @@ var Services = {
     AirPlay: "AirPlay"
 };
 
+/**
+ * @constant
+ * @property {number} NUM_0
+ * @property {number} NUM_1
+ * @property {number} NUM_2
+ * @property {number} NUM_3
+ * @property {number} NUM_4
+ * @property {number} NUM_5
+ * @property {number} NUM_6
+ * @property {number} NUM_7
+ * @property {number} NUM_8
+ * @property {number} NUM_9
+ * @property {number} DASH
+ * @property {number} ENTER
+*/
 var KeyCodes = {
     NUM_0: 0,
     NUM_1: 1,
@@ -1271,7 +1286,7 @@ var MediaControlWrapper = createClass(
  * @class PlaylistControlWrapper
  */
 var PlaylistControlWrapper = createClass(
-/** @lends MediaControl.prototype */
+/** @lends PlaylistControl.prototype */
 {
     mixins: [SimpleEventEmitter, WrappedObject],
 
@@ -1734,9 +1749,9 @@ registerDeviceInterface("mediaControl",
     /** @method */
     fastForward: {},
 
-    /*
+    /**
      * @method
-     * @param {number} position
+     * @param {number} position - Media seek position in seconds
      */
     seek: {
         args: ["position"]
@@ -1759,6 +1774,25 @@ registerDeviceInterface("mediaControl",
      * @success {playStateCallback}
      */
     subscribePlayState: {}
+});
+
+/** @class PlaylistControl */
+registerDeviceInterface("playlistControl",
+/** @lends PlaylistControl.prototype */
+{
+    /** @method */
+    next: {},
+
+    /** @method */
+    previous: {},
+
+    /**
+     * @method
+     * @param {number} index - Playlist track index
+     */
+    jumpToTrack: {
+        args: ["index"]
+    }
 });
 
 /**
