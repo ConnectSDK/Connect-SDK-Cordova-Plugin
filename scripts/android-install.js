@@ -9,7 +9,7 @@ var exec = require('child_process').exec,
 	csdkDirectory;
 
 var commands = {
-	rmRF: isWin ? "rmdir /s" : "rm -rf",
+	rmRF: isWin ? "rmdir /S /Q" : "rm -rf",
 	cp: isWin ? "copy" : "cp",
 	mv: isWin ? "move" : "mv"
 };
