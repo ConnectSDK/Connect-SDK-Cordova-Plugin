@@ -19,7 +19,7 @@ if (!isMac) {
 	};
 
 	var paths = {
-		"ConnectSDK_Framework": "http://github.com/ConnectSDK/Connect-SDK-Cordova-Plugin/releases/download/1.6.0/ConnectSDK.framework.zip",
+		"ConnectSDK_Framework": "http://github.com/ConnectSDK/Connect-SDK-iOS/releases/download/1.6.0/ConnectSDK.framework.zip",
 		"ConnectSDK_Version": "tags/1.6.0",
 		"FlingSDK_URL": "https://s3-us-west-1.amazonaws.com/amazon-fling/AmazonFling-SDK.zip",
 		"AmazonFling_Framework": "./csdk_tmp/ios-sdk/frameworks/AmazonFling.framework",
