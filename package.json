@@ -1,0 +1,49 @@
+{
+    "name": "cordova-plugin-connectsdk",
+    "version": "1.6.0",
+    "description": "Connect SDK allows discovery and communication with LG TVs and other smart devices on the local network.",
+    "cordova": {
+        "id": "cordova-plugin-connectsdk",
+        "platforms": [
+            "ios",
+            "android"
+        ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "ConnectSDK:Connect-SDK-Cordova-Plugin"
+    },
+    "keywords": [
+        "LG",
+        "second screen",
+        "TV",
+        "Connect SDK",
+        "remote control",
+        "DLNA",
+        "DIAL",
+        "cast",
+        "ecosystem:cordova",
+        "cordova-ios",
+        "cordova-android"
+    ],
+    "engines": [
+        {
+            "name": "cordova",
+            "version": ">=5.0.0"
+        },
+        {
+            "name": "cordova-ios",
+            "version": ">=3.9.1"
+        },
+        {
+            "name": "cordova-android",
+            "version": ">=4.1.1"
+        }
+    ],
+    "author": "ConnectSDK",
+    "license": "Apache 2.0",
+    "bugs": {
+        "url": "https://github.com/ConnectSDK/Connect-SDK-Cordova-Plugin/issues"
+    },
+    "homepage": "https://github.com/ConnectSDK/Connect-SDK-Cordova-Plugin#readme"
+}

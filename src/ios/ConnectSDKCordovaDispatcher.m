@@ -147,19 +147,30 @@ static id orNull (id obj)
     };
 }
 
-- (MediaPlayerDisplaySuccessBlock) mediaLaunchSuccess
+- (MediaPlayerSuccessBlock) mediaLaunchSuccess
 {
-    return ^(LaunchSession* session, id<MediaControl> control) {
+    return ^(MediaLaunchObject *mediaLaunchObject) {
         NSMutableDictionary* mediaControlObj = [NSMutableDictionary dictionary]; // TODO media control details
         
-        MediaControlWrapper* controlWrapper = [[MediaControlWrapper alloc] initWithPlugin:self.plugin mediaControl:control];
+        MediaControlWrapper* controlWrapper = [[MediaControlWrapper alloc] initWithPlugin:self.plugin
+                                                                             mediaControl:mediaLaunchObject.mediaControl];
         [self.plugin addObjectWrapper:controlWrapper];
         
         mediaControlObj[@"objectId"] = controlWrapper.objectId;
-        
+
+        NSDictionary *playlistControlObj;
+        if (mediaLaunchObject.playListControl) {
+            PlaylistControlWrapper *playlistControlWrapper = [[PlaylistControlWrapper alloc]
+                initWithPlugin:self.plugin
+               playlistControl:mediaLaunchObject.playListControl];
+            [self.plugin addObjectWrapper:playlistControlWrapper];
+            playlistControlObj = @{@"objectId": playlistControlWrapper.objectId};
+        }
+
         NSArray* result = @[
-            [session toJSONObject],
-            mediaControlObj
+            [mediaLaunchObject.session toJSONObject],
+            mediaControlObj,
+            orNull(playlistControlObj),
         ];
         
         [self sendSuccessWithArray:result];
@@ -265,7 +276,7 @@ static id orNull (id obj)
             NSDictionary* obj = @{
                 @"id": orNull(info.id),
                 @"name": orNull(info.name),
-                @"iconURL": orNull(info.iconURL)
+                @"iconURL": orNull(info.iconURL.absoluteString)
             };
             
             [objs addObject:obj];
@@ -408,6 +419,13 @@ static id orNull (id obj)
     [device.launcher closeApp:launchSession success:command.success failure:command.failure];
 }
 
+- (void) launcher_launchAppStore:(JSCommand*)command
+{
+    NSString* appId = command.args[@"appId"];
+    
+    [device.launcher launchAppStore:appId success:command.appLaunchSuccess failure:command.failure];
+}
+
 - (void) launcher_launchBrowser:(JSCommand*)command
 {
     NSString* urlString = command.args[@"url"];
@@ -525,6 +543,38 @@ static id orNull (id obj)
     return [mediaControl subscribePlayStateWithSuccess:command.playStateSuccess failure:command.failure];
 }
 
+#pragma mark - PlayListControl
+
+- (void)playlistControl_next:(JSCommand *)command {
+    id<PlayListControl> playlistControl = [self playlistControlFromCommand:command];
+    if (playlistControl) {
+        [playlistControl playNextWithSuccess:command.success
+                                     failure:command.failure];
+    }
+}
+
+- (void)playlistControl_previous:(JSCommand *)command {
+    id<PlayListControl> playlistControl = [self playlistControlFromCommand:command];
+    if (playlistControl) {
+        [playlistControl playPreviousWithSuccess:command.success
+                                         failure:command.failure];
+    }
+}
+
+- (void)playlistControl_jumpToTrack:(JSCommand *)command {
+    id<PlayListControl> playlistControl = [self playlistControlFromCommand:command];
+    if (playlistControl) {
+        NSNumber *indexNumber = command.args[@"index"];
+        if (indexNumber) {
+            [playlistControl jumpToTrackWithIndex:[indexNumber integerValue]
+                                          success:command.success
+                                          failure:command.failure];
+        } else {
+            [command sendErrorMessage:@"index cannot be nil"];
+        }
+    }
+}
+
 #pragma mark - MediaPlayer
 
 - (void) mediaPlayer_displayImage:(JSCommand*)command
@@ -567,7 +617,7 @@ static id orNull (id obj)
 
 - (void) volumeControl_setMute:(JSCommand*)command
 {
-    BOOL mute = [(NSNumber*)command.args[@"volume"] boolValue];
+    BOOL mute = [(NSNumber*)command.args[@"mute"] boolValue];
     [device.volumeControl setMute:mute success:command.success failure:command.failure];
 }
 
@@ -707,6 +757,11 @@ static id orNull (id obj)
     [device.externalInputControl setExternalInput:externalInputInfo success:command.success failure:command.failure];
 }
 
+- (void)externalInputControl_showExternalInputPicker:(JSCommand *)command {
+    [device.externalInputControl launchInputPickerWithSuccess:command.appLaunchSuccess
+                                                      failure:command.failure];
+}
+
 #pragma mark - WebAppLauncher
 
 - (void) webAppLauncher_launchWebApp:(JSCommand*)command
@@ -720,6 +775,30 @@ static id orNull (id obj)
 - (void) webAppLauncher_joinWebApp:(JSCommand*)command
 {
     [device.webAppLauncher joinWebAppWithId:command.args[@"webAppId"] success:command.webAppLaunchSuccess failure:command.failure];
+}
+
+- (void)webAppLauncher_pinWebApp:(JSCommand *)command {
+    [device.webAppLauncher pinWebApp:command.args[@"webAppId"]
+                             success:command.success
+                             failure:command.failure];
+}
+
+- (void)webAppLauncher_unPinWebApp:(JSCommand *)command {
+    [device.webAppLauncher unPinWebApp:command.args[@"webAppId"]
+                               success:command.success
+                               failure:command.failure];
+}
+
+- (void)webAppLauncher_isWebAppPinned:(JSCommand *)command {
+    [device.webAppLauncher isWebAppPinned:command.args[@"webAppId"]
+                                  success:command.successWithBool
+                                  failure:command.failure];
+}
+
+- (void)webAppLauncher_subscribeIsWebAppPinned:(JSCommand *)command {
+    [device.webAppLauncher subscribeIsWebAppPinned:command.args[@"webAppId"]
+                                           success:command.successWithBool
+                                           failure:command.failure];
 }
 
 #pragma mark - KeyControl
@@ -933,6 +1012,23 @@ static id orNull (id obj)
     }
 }
 
+- (id<PlayListControl>) playlistControlFromCommand:(JSCommand*)command
+{
+    NSString* objectId = command.args[@"objectId"];
+    if (objectId) {
+        PlaylistControlWrapper *wrapper = [command.plugin getObjectWrapper:objectId];
+        if (wrapper) {
+            return wrapper.playlistControl;
+        }
+
+        [command sendErrorMessage:@"invalid PlaylistControl object"];
+    } else {
+        [command sendErrorMessage:@"PlaylistControl not found for device"];
+    }
+
+    return nil;
+}
+
 - (AppInfo*) parseAppInfo:(NSObject*)obj
 {
     if ([obj isKindOfClass:[NSDictionary class]]) {
@@ -956,33 +1052,45 @@ static id orNull (id obj)
 
 - (void) displayMediaCommon:(JSCommand*)command type:(NSString*)type
 {
-    NSURL* url = [NSURL URLWithString:command.args[@"url"]];
-    NSString* mimeType = command.args[@"mimeType"];
-    NSDictionary* options = command.args[@"options"];
-    
-    NSString* title = nil;
-    NSString* description = nil;
-    NSURL* iconUrl = nil;
+    MediaInfo *mediaInfo = [[MediaInfo alloc]
+        initWithURL:[NSURL URLWithString:command.args[@"url"]]
+           mimeType:command.args[@"mimeType"]];
     BOOL shouldLoop = NO;
-    
+
+    NSDictionary* options = command.args[@"options"];
     if (options) {
-        title = options[@"title"];
-        description = options[@"description"];
-        
-        NSString* iconUrlString = options[@"url"];
-        if (iconUrl) {
-            iconUrl = [NSURL URLWithString:iconUrlString];
-        }
-        
+        mediaInfo.title = options[@"title"];
+        mediaInfo.description = options[@"description"];
+
+        ImageInfo *imageInfo = [[ImageInfo alloc]
+            initWithURL:[NSURL URLWithString:options[@"iconUrl"]]
+                   type:ImageTypeAlbumArt];
+        [mediaInfo addImage:imageInfo];
+
         if (options[@"shouldLoop"] == [NSNumber numberWithBool:YES]) {
             shouldLoop = YES;
         }
+
+        NSDictionary *subtitleDict = options[@"subtitles"];
+        if (subtitleDict) {
+            mediaInfo.subtitleInfo = [SubtitleInfo infoWithURL:[NSURL URLWithString:subtitleDict[@"url"]]
+                                                      andBlock:^(SubtitleInfoBuilder *builder) {
+                                                          builder.mimeType = subtitleDict[@"mimeType"];
+                                                          builder.language = subtitleDict[@"language"];
+                                                          builder.label = subtitleDict[@"label"];
+                                                      }];
+        }
     }
-    
+
     if ([type isEqualToString:@"image"]) {
-        [device.mediaPlayer displayImage:url iconURL:iconUrl title:title description:description mimeType:mimeType success:command.mediaLaunchSuccess failure:command.failure];
+        [device.mediaPlayer displayImageWithMediaInfo:mediaInfo
+                                              success:command.mediaLaunchSuccess
+                                              failure:command.failure];
     } else {
-        [device.mediaPlayer playMedia:url iconURL:iconUrl title:title description:description mimeType:mimeType shouldLoop:shouldLoop success:command.mediaLaunchSuccess failure:command.failure];
+        [device.mediaPlayer playMediaWithMediaInfo:mediaInfo
+                                        shouldLoop:shouldLoop
+                                           success:command.mediaLaunchSuccess
+                                           failure:command.failure];
     }
 }
 

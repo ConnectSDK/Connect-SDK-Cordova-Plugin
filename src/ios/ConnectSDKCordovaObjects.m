@@ -95,7 +95,18 @@ static int nextObjectId = 0;
     if (self) {
         self.mediaControl = mediaControl;
     }
-    
+
+    return self;
+}
+
+@end
+
+@implementation PlaylistControlWrapper
+
+- (instancetype)initWithPlugin:(ConnectSDKCordova *)plugin
+               playlistControl:(id <PlayListControl>)playlistControl {
+    self = [super initWithPlugin:plugin];
+    _playlistControl = playlistControl;
     return self;
 }
 
