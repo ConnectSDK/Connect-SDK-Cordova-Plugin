@@ -16,7 +16,7 @@ var commands = {
 
 var paths = {
 	"ConnectSDK_Repository": "https://github.com/ConnectSDK/Connect-SDK-Android.git",
-	"ConnectSDK_Tag": "tags/1.6.0",
+	"ConnectSDK_Tag": "1.6.2",
 	"FlingSDK_URL": "https://s3-us-west-1.amazonaws.com/amazon-fling/AmazonFling-SDK.zip",
 	"AmazonFling_Jar": "./csdk_tmp/android-sdk/lib/AmazonFling.jar",
 	"WhisperPlay_Jar": "./csdk_tmp/android-sdk/lib/android/WhisperPlay.jar"
