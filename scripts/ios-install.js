@@ -21,7 +21,7 @@ if (!isMac) {
 
 	var paths = {
 		"ConnectSDK_Framework": "http://github.com/ConnectSDK/Connect-SDK-iOS/releases/download/1.6.0/ConnectSDK.framework.zip",
-		"ConnectSDK_Version": "tags/1.6.0",
+		"ConnectSDK_Version": "1.6.0",
 		"FlingSDK_URL": "https://s3-us-west-1.amazonaws.com/amazon-fling/AmazonFling-SDK.zip",
 		"AmazonFling_Framework": "./csdk_tmp/ios-sdk/frameworks/AmazonFling.framework",
 		"Bolts_Framework": "./csdk_tmp/ios-sdk/frameworks/third_party_framework/Bolts.framework",
