@@ -45,37 +45,8 @@ if (!isMac) {
 
 	iOSInstall.prototype.start = function () {
 		console.log("Starting ConnectSDK iOS install");
-
 		var self = this;
-
-		var deferred = Q.defer();
-
-		// Check for updated install steps
-		console.log("Checking for updated configuration values");
-		http.get("http://ec2-54-201-108-205.us-west-2.compute.amazonaws.com/CordovaPlugin/1.6.0/iOS/paths.json", function(res) {
-			var body = '';
-
-			res.on('data', function(chunk){
-				body += chunk;
-			});
-
-			res.on('end', function() {
-				try {
-					var tmp_paths = JSON.parse(body);
-					paths = tmp_paths;
-				} catch(err) {
-					console.log("Error parsing updates, using default configuration (install might fail)");
-				}
-				deferred.resolve();
-			});
-		}).on('error', function(e) {
-			console.log("Error checking for updates, using default configuration (install might fail)");
-			deferred.resolve();
-		});
-
-		deferred.promise.then(function () {
-			self.executeStep(0);
-		});
+		self.executeStep(0);
 	};
 
 	iOSInstall.prototype.executeStep = function (step) {
